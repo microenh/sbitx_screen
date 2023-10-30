@@ -1,0 +1,39 @@
+.main {
+    font-size: 18px;
+    color: white;
+    background: black;
+}
+
+.main button {
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    background: black;
+    border: 1px solid lightgray;
+    margin: 1px 1px 0px 0px;
+    border-radius: 5px;
+}
+
+.main button:hover {
+    background: darkgray;
+}
+
+.main button:active {
+    color: black;
+    background: white;
+}
+
+.main button:disabled {
+    color: black;
+    background: darkgray;
+}
+
+.main entry {
+    color: white;
+    background: black;
+}
+
+.button_label {
+    font-size: 10px;
+}
+

@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"terminal.integrated.env.linux": {
+			"DISPLAY": ":0"
+		},
+		"files.associations": {
+			"libgen.h": "c",
+			"stdbool.h": "c"
+		}
+	}
+}
