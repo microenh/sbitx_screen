@@ -4,6 +4,7 @@
 
 #include "display.h"
 #include "radio.h"
+#include "settings.h"
 
 #define GLADE "sbitx_screen.glade"
 #define CSS "main.css"
@@ -60,7 +61,8 @@ static GtkButton
     *btn_wpm,
     *btn_comp,
     *btn_mic,
-    *btn_power;
+    *btn_power,
+    *btn_rx_tx;
 
 
 static GtkEntry* ent_command;
@@ -112,6 +114,7 @@ void init_display(int argc, char **argv) {
     btn_comp = GTK_BUTTON(gtk_builder_get_object(builder, "btn_comp"));
     btn_mic = GTK_BUTTON(gtk_builder_get_object(builder, "btn_mic"));
     btn_power = GTK_BUTTON(gtk_builder_get_object(builder, "btn_power"));
+    btn_rx_tx = GTK_BUTTON(gtk_builder_get_object(builder, "btn_rx_tx"));
 
     ent_command = GTK_ENTRY(gtk_builder_get_object(builder, "ent_command"));
 
@@ -129,26 +132,43 @@ void init_display(int argc, char **argv) {
 
 
 void update_console(char *text) {gtk_label_set_text(lbl_console, text);}
-void update_step(char *text) {gtk_label_set_text(lbl_step, text);}
-void update_vfo(char *text) {gtk_label_set_text(lbl_vfo, text);}
-void update_span(char *text) {gtk_label_set_text(lbl_span, text);}
-void update_rit(char *text) {gtk_label_set_text(lbl_rit, text);}
-void update_vfob(char *text) {gtk_label_set_text(lbl_vfob, text);}
-void update_vfoa(char *text) {gtk_label_set_text(lbl_vfoa, text);}
 void update_date(char *text) {gtk_label_set_text(lbl_date, text);}
-void update_power(char *text) {gtk_label_set_text(lbl_power, text);}
-void update_record(char *text) {gtk_label_set_text(lbl_record, text);}
-void update_mic(char *text) {gtk_label_set_text(lbl_mic, text);}
-void update_comp(char *text) {gtk_label_set_text(lbl_comp, text);}
-void update_wpm(char *text) {gtk_label_set_text(lbl_wpm, text);}
-void update_pitch(char *text) {gtk_label_set_text(lbl_pitch, text);}
-void update_split(char *text) {gtk_label_set_text(lbl_split, text);}
-void update_mode(char *text) {gtk_label_set_text(lbl_mode, text);}
-void update_low(char *text) {gtk_label_set_text(lbl_low, text);}
-void update_high(char *text) {gtk_label_set_text(lbl_high, text);}
-void update_agc(char *text) {gtk_label_set_text(lbl_agc, text);}
-void update_if(char *text) {gtk_label_set_text(lbl_if, text);}
-void update_af(char *text) {gtk_label_set_text(lbl_af, text);}
+
+void update_step(Step step) {gtk_label_set_text(lbl_step, steps[step]);}
+void update_span(Span span) {gtk_label_set_text(lbl_span, spans[span]);}
+void update_mode(Mode mode) {gtk_label_set_text(lbl_mode, modes[mode]);}
+void update_agc(Agc agc) {gtk_label_set_text(lbl_agc, agcs[agc]);}
+void update_vfo(Vfo vfo) {gtk_label_set_text(lbl_vfo, vfos[vfo]);}
+
+static void update_vfo_text(GtkLabel *label, char vfo_id, int frequency, Mode mode) {
+    char temp[30];
+    sprintf(temp, "VFO %c: %d %s", vfo_id, frequency, modes[mode]);
+    gtk_label_set_text(label, temp);
+}
+
+void update_vfoa(int frequency, Mode mode) {update_vfo_text(lbl_vfoa, 'A', frequency, mode);}
+void update_vfob(int frequency, Mode mode) {update_vfo_text(lbl_vfob, 'B', frequency, mode);}
+
+void update_split(bool on) {gtk_label_set_text(lbl_split, off_on[on]);}
+void update_rit(bool on) {gtk_label_set_text(lbl_rit, off_on[on]);}
+void update_record(bool on) {gtk_label_set_text(lbl_record, off_on[on]);}
+
+static void update_label_int(GtkLabel *label, int value) {
+    char temp[20];
+    sprintf(temp, "%d", value);
+    gtk_label_set_text(label, temp);    
+}
+
+void update_power(int level) {update_label_int(lbl_power, level);}
+void update_mic(int level) {update_label_int(lbl_mic, level);}
+void update_comp(int level) {update_label_int(lbl_comp, level);}
+void update_wpm(int wpm) {update_label_int(lbl_wpm, wpm);}
+void update_pitch(int pitch) {update_label_int(lbl_pitch, pitch);}
+void update_low(int frequency) {update_label_int(lbl_low, frequency);}
+void update_high(int frequency) {update_label_int(lbl_high, frequency);}
+void update_if(int level) {update_label_int(lbl_if, level);}
+void update_af(int level) {update_label_int(lbl_af, level);}
+void update_rx_tx(bool rx_tx) {gtk_button_set_label(btn_rx_tx, rx_txs[rx_tx]);}
 
 void enable_high(bool enable) {gtk_widget_set_sensitive(GTK_WIDGET(btn_high), enable);}
 void enable_low(bool enable) {gtk_widget_set_sensitive(GTK_WIDGET(btn_low), enable);}
@@ -192,8 +212,7 @@ void btn_agc_clicked_cb(GtkButton *b) {do_agc();}
 void btn_mode_clicked_cb(GtkButton *b) {do_mode();}
 void btn_split_clicked_cb(GtkButton *b) {do_split();}
 void btn_record_clicked_cb(GtkButton *b) {do_record();}
-void btn_rx_clicked_cb(GtkButton *b) {do_rx();}
-void btn_tx_clicked_cb(GtkButton *b) {do_tx();}
+void btn_rx_tx_clicked_cb(GtkButton *b) {do_rx_tx();}
 void btn_rit_clicked_cb(GtkButton *b) {do_rit();}
 void btn_span_clicked_cb(GtkButton *b) {do_span();}
 void btn_vfo_clicked_cb(GtkButton *b) {do_vfo();}

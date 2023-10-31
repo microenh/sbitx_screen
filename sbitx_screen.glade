@@ -442,28 +442,15 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="btn_tx">
-                    <property name="label" translatable="yes">TX</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                    <signal name="clicked" handler="btn_tx_clicked_cb" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="left-attach">4</property>
-                    <property name="top-attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="btn_rx">
+                  <object class="GtkButton" id="btn_rx_tx">
                     <property name="label" translatable="yes">RX</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <signal name="clicked" handler="btn_rx_clicked_cb" swapped="no"/>
+                    <signal name="clicked" handler="btn_rx_tx_clicked_cb" swapped="no"/>
                   </object>
                   <packing>
-                    <property name="left-attach">5</property>
+                    <property name="left-attach">4</property>
                     <property name="top-attach">2</property>
                   </packing>
                 </child>
@@ -1093,6 +1080,9 @@
                     <property name="left-attach">7</property>
                     <property name="top-attach">0</property>
                   </packing>
+                </child>
+                <child>
+                  <placeholder/>
                 </child>
               </object>
               <packing>

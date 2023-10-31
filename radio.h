@@ -1,5 +1,7 @@
 #pragma once
 
+void init_radio(void);
+
 void do_high(void);
 void do_low(void);
 void do_af(void);
@@ -19,8 +21,7 @@ void do_15m(void);
 void do_17m(void);
 void do_20m(void);
 void do_record(void);
-void do_rx(void);
-void do_tx(void);
+void do_rx_tx(void);
 void do_30m(void);
 void do_40m(void);
 void do_80m(void);

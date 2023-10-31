@@ -37,10 +37,14 @@
 #include <libgen.h>
 
 #include "display.h"
+#include "settings.h"
+#include "radio.h"
 
 
 int main(int argc, char *argv[]) {
 	init_display(argc, argv);
+	init_radio();
+
 	gtk_main();
 
 	return EXIT_SUCCESS;
