@@ -16,7 +16,8 @@ typedef struct _radio {
     bool split;
     bool record;
     bool rx_tx;
-    SmEncoder smEncoder;
+    SubEncoder subEncoder;
+    int level[se_END];
 } Radio;
 
 static Radio radio;
@@ -40,7 +41,9 @@ void init_radio(void) {
     update_split(radio.split);
     update_record(radio.record);
     update_rx_tx(radio.rx_tx);
-    enable_highlight(radio.smEncoder, true);
+    enable_highlight(radio.subEncoder, true);
+    for (int i=0; i<se_END; i++)
+        update_level(i, radio.level[i]);
 }
 
 void do_agc(void) {
@@ -104,8 +107,31 @@ void do_rx_tx(void) {
 }
 
 
-void select_small_encoder(SmEncoder item) {
-    enable_highlight(radio.smEncoder, false);
-    radio.smEncoder = item;
-    enable_highlight(radio.smEncoder, true);    
+void select_small_encoder(SubEncoder item) {
+    if (item != radio.subEncoder) {
+        enable_highlight(radio.subEncoder, false);
+        radio.subEncoder = item;
+        enable_highlight(radio.subEncoder, true);  
+    }  
+}
+
+
+// af, comp, high, if, low, mic, pitch, power, wpm
+const int subEncoderMin[] = {  0,   0,    0,   0,    0,   0,    0,   0,  5};
+const int subEncoderMax[] = {100, 100, 4000, 100, 1000, 100, 1500, 100, 40};
+
+void do_sub_encoder(int change) {
+    int i = radio.level[radio.subEncoder] + change;
+    if (i < subEncoderMin[radio.subEncoder])
+        i = subEncoderMin[radio.subEncoder];
+    else if (i > subEncoderMax[radio.subEncoder])
+        i = subEncoderMax[radio.subEncoder];    
+    if (i != radio.level[radio.subEncoder]) {
+        radio.level[radio.subEncoder] = i;
+        update_level(radio.subEncoder, i);
+    }
+}
+
+void do_main_encoder(int change) {
+
 }

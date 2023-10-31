@@ -8,6 +8,7 @@ void init_display(int argc, char **argv);
 
 void update_console(char *text);
 void update_date(char *text);
+void update_level(SubEncoder item, int value);
 
 void update_step(Step step);
 void update_span(Span span);
@@ -23,14 +24,4 @@ void update_record(bool on);
 void update_rit(bool on);
 void update_rx_tx(bool rx_tx);
 
-void update_power(int level);
-void update_mic(int level);
-void update_comp(int level);
-void update_wpm(int wpm);
-void update_pitch(int pitch);
-void update_low(int frequency);
-void update_high(int frequncy);
-void update_if(int level);
-void update_af(int level);
-
-void enable_highlight(SmEncoder item, bool on); 
+void enable_highlight(SubEncoder item, bool on); 

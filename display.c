@@ -1,10 +1,13 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include <gtk/gtk.h>
 #include <gtk/gtkx.h>
+#include <time.h>
 
 #include "display.h"
 #include "radio.h"
 #include "settings.h"
+#include "rotary.h"
 
 #define GLADE "sbitx_screen.glade"
 #define CSS "main.css"
@@ -30,39 +33,41 @@ static void open_glade_and_css(GtkBuilder **builder, GtkCssProvider **css_provid
 }
 
 static GtkLabel
+    *lbl_agc,
     *lbl_console,
+    *lbl_date,
+    *lbl_mode,
+    *lbl_record,
+    *lbl_rit,
+    *lbl_span,
+    *lbl_split,
     *lbl_step,
     *lbl_vfo,
-    *lbl_span,
-    *lbl_rit,
-    *lbl_vfob,
     *lbl_vfoa,
-    *lbl_date,
-    *lbl_power,
-    *lbl_record,
-    *lbl_mic,
+    *lbl_vfob,
+    // -----
+    *lbl_af,
     *lbl_comp,
-    *lbl_wpm,
-    *lbl_pitch,
-    *lbl_split,
-    *lbl_mode,
-    *lbl_low,
     *lbl_high,
-    *lbl_agc,
     *lbl_if,
-    *lbl_af;
+    *lbl_low,
+    *lbl_mic,
+    *lbl_pitch,
+    *lbl_power,
+    *lbl_wpm;
 
 static GtkButton
-    *btn_high,
-    *btn_low,
+    *btn_rx_tx,
+    // -----
     *btn_af,
-    *btn_if,
-    *btn_pitch,
-    *btn_wpm,
     *btn_comp,
+    *btn_high,
+    *btn_if,
+    *btn_low,
     *btn_mic,
+    *btn_pitch,
     *btn_power,
-    *btn_rx_tx;
+    *btn_wpm;
 
 
 static GtkEntry* ent_command;
@@ -70,6 +75,42 @@ static GtkEntry* ent_command;
 static GtkWidget *window;
 
 static GtkStyleContext *highlight[se_END];
+static GtkLabel *level[se_END];
+
+#define SUB_RESET 10
+
+static volatile int sub_reset = SUB_RESET;
+
+int heartbeat(gpointer data) {
+    static int hb_ctr;
+    if (hb_ctr) {
+        hb_ctr--;
+    } else {
+        hb_ctr = 8;
+        
+        char temp[40];
+
+        time_t t;   // not a primitive datatype
+        time(&t);
+
+        struct tm *pm;
+        pm = gmtime(&t);
+        sprintf(temp, "%2d:%02d:%02d", pm->tm_hour, pm->tm_min, pm->tm_sec);
+        gtk_label_set_text(lbl_date, temp);
+        sub_reset--;
+        if (!sub_reset) {
+            select_small_encoder(se_af);
+            sub_reset = SUB_RESET;
+        }
+    }
+    if (level_ticks) {
+        do_sub_encoder(level_ticks);
+        level_ticks = 0;
+        sub_reset = SUB_RESET;
+    }
+    return true;
+}
+
 
 void init_display(int argc, char **argv) {
 	gtk_init(&argc, &argv); // init Gtk
@@ -92,13 +133,14 @@ void init_display(int argc, char **argv) {
     lbl_vfob = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfob"));
     lbl_vfoa = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfoa"));
     lbl_date = GTK_LABEL(gtk_builder_get_object(builder, "lbl_date"));
-    lbl_power = GTK_LABEL(gtk_builder_get_object(builder, "lbl_power"));
     lbl_record = GTK_LABEL(gtk_builder_get_object(builder, "lbl_record"));
+    lbl_split = GTK_LABEL(gtk_builder_get_object(builder, "lbl_split"));
+
+    lbl_power = GTK_LABEL(gtk_builder_get_object(builder, "lbl_power"));
     lbl_mic = GTK_LABEL(gtk_builder_get_object(builder, "lbl_mic"));
     lbl_comp = GTK_LABEL(gtk_builder_get_object(builder, "lbl_comp"));
     lbl_wpm = GTK_LABEL(gtk_builder_get_object(builder, "lbl_wpm"));
     lbl_pitch = GTK_LABEL(gtk_builder_get_object(builder, "lbl_pitch"));
-    lbl_split = GTK_LABEL(gtk_builder_get_object(builder, "lbl_split"));
     lbl_mode = GTK_LABEL(gtk_builder_get_object(builder, "lbl_mode"));
     lbl_low = GTK_LABEL(gtk_builder_get_object(builder, "lbl_low"));
     lbl_high = GTK_LABEL(gtk_builder_get_object(builder, "lbl_high"));
@@ -124,15 +166,27 @@ void init_display(int argc, char **argv) {
 								GTK_STYLE_PROVIDER_PRIORITY_USER);
     
     highlight[se_af] = gtk_widget_get_style_context(GTK_WIDGET(lbl_af));
-    highlight[se_high] = gtk_widget_get_style_context(GTK_WIDGET(lbl_high));
-    highlight[se_low] = gtk_widget_get_style_context(GTK_WIDGET(lbl_low));
-    highlight[se_if] = gtk_widget_get_style_context(GTK_WIDGET(lbl_if));
-    highlight[se_pitch] = gtk_widget_get_style_context(GTK_WIDGET(lbl_pitch));
-    highlight[se_wpm] = gtk_widget_get_style_context(GTK_WIDGET(lbl_wpm));
     highlight[se_comp] = gtk_widget_get_style_context(GTK_WIDGET(lbl_comp));
+    highlight[se_high] = gtk_widget_get_style_context(GTK_WIDGET(lbl_high));
+    highlight[se_if] = gtk_widget_get_style_context(GTK_WIDGET(lbl_if));
+    highlight[se_low] = gtk_widget_get_style_context(GTK_WIDGET(lbl_low));
     highlight[se_mic] = gtk_widget_get_style_context(GTK_WIDGET(lbl_mic));
+    highlight[se_pitch] = gtk_widget_get_style_context(GTK_WIDGET(lbl_pitch));
     highlight[se_power] = gtk_widget_get_style_context(GTK_WIDGET(lbl_power));
+    highlight[se_wpm] = gtk_widget_get_style_context(GTK_WIDGET(lbl_wpm));
 
+    level[se_af] = lbl_af;
+    level[se_comp] = lbl_comp;
+    level[se_high] = lbl_high;
+    level[se_if] = lbl_if;
+    level[se_low] = lbl_low;
+    level[se_mic] = lbl_mic;
+    level[se_pitch] = lbl_pitch;
+    level[se_power] = lbl_power;
+    level[se_wpm] = lbl_wpm;
+
+    init_gpio_pins();
+    g_timeout_add(125, heartbeat, NULL);
 
 	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     gtk_builder_connect_signals(builder, NULL);
@@ -165,25 +219,17 @@ void update_split(bool on) {gtk_label_set_text(lbl_split, off_on[on]);}
 void update_rit(bool on) {gtk_label_set_text(lbl_rit, off_on[on]);}
 void update_record(bool on) {gtk_label_set_text(lbl_record, off_on[on]);}
 
-static void update_label_int(GtkLabel *label, int value) {
+void update_level(SubEncoder item, int value) {
     char temp[20];
     sprintf(temp, "%d", value);
-    gtk_label_set_text(label, temp);    
+    gtk_label_set_text(level[item], temp);    
 }
 
-void update_power(int level) {update_label_int(lbl_power, level);}
-void update_mic(int level) {update_label_int(lbl_mic, level);}
-void update_comp(int level) {update_label_int(lbl_comp, level);}
-void update_wpm(int wpm) {update_label_int(lbl_wpm, wpm);}
-void update_pitch(int pitch) {update_label_int(lbl_pitch, pitch);}
-void update_low(int frequency) {update_label_int(lbl_low, frequency);}
-void update_high(int frequency) {update_label_int(lbl_high, frequency);}
-void update_if(int level) {update_label_int(lbl_if, level);}
-void update_af(int level) {update_label_int(lbl_af, level);}
+
 void update_rx_tx(bool rx_tx) {gtk_button_set_label(btn_rx_tx, rx_txs[rx_tx]);}
 
 
-void enable_highlight(SmEncoder item, bool on) {
+void enable_highlight(SubEncoder item, bool on) {
     static void (* fn[])(GtkStyleContext *, const gchar *) = {
         gtk_style_context_remove_class,
         gtk_style_context_add_class
@@ -200,16 +246,20 @@ void btn_minimize_clicked_cb(GtkButton *b) {
     gtk_window_iconify(GTK_WINDOW(window));
 }
 
+static void call_select_small_encoder(SubEncoder item) {
+    sub_reset = SUB_RESET;
+    select_small_encoder(item);
+}
 
-void btn_high_clicked_cb(GtkButton *b) {select_small_encoder(se_high);}
-void btn_low_clicked_cb(GtkButton *b) {select_small_encoder(se_low);}
-void btn_af_clicked_cb(GtkButton *b) {select_small_encoder(se_af);}
-void btn_if_clicked_cb(GtkButton *b) {select_small_encoder(se_if);}
-void btn_pitch_clicked_cb(GtkButton *b) {select_small_encoder(se_pitch);}
-void btn_wpm_clicked_cb(GtkButton *b) {select_small_encoder(se_wpm);}
-void btn_comp_clicked_cb(GtkButton *b) {select_small_encoder(se_comp);}
-void btn_mic_clicked_cb(GtkButton *b) {select_small_encoder(se_mic);}
-void btn_power_clicked_cb(GtkButton *b) {select_small_encoder(se_power);}
+void btn_high_clicked_cb(GtkButton *b) {call_select_small_encoder(se_high);}
+void btn_low_clicked_cb(GtkButton *b) {call_select_small_encoder(se_low);}
+void btn_af_clicked_cb(GtkButton *b) {call_select_small_encoder(se_af);}
+void btn_if_clicked_cb(GtkButton *b) {call_select_small_encoder(se_if);}
+void btn_pitch_clicked_cb(GtkButton *b) {call_select_small_encoder(se_pitch);}
+void btn_wpm_clicked_cb(GtkButton *b) {call_select_small_encoder(se_wpm);}
+void btn_comp_clicked_cb(GtkButton *b) {call_select_small_encoder(se_comp);}
+void btn_mic_clicked_cb(GtkButton *b) {call_select_small_encoder(se_mic);}
+void btn_power_clicked_cb(GtkButton *b) {call_select_small_encoder(se_power);}
 
 void btn_10m_clicked_cb(GtkButton *b) {do_10m();}
 void btn_12m_clicked_cb(GtkButton *b) {do_12m();}

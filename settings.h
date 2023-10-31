@@ -42,16 +42,16 @@ typedef enum _vfo {
     v_END
 } Vfo;
 
-typedef enum _sm_encoder {
+typedef enum _subEncoder {
     se_af,
-    se_high,
-    se_low,
-    se_if,
-    se_pitch,
-    se_wpm,
     se_comp,
+    se_high,
+    se_if,
+    se_low,
     se_mic,
+    se_pitch,
     se_power,
+    se_wpm,
     se_END
-} SmEncoder;
+} SubEncoder;
 

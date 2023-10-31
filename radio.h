@@ -4,7 +4,7 @@
 
 void init_radio(void);
 
-void select_small_encoder(SmEncoder item);
+void select_small_encoder(SubEncoder item);
 
 void do_agc(void);
 void do_mode(void);
@@ -23,3 +23,6 @@ void do_rit(void);
 void do_span(void);
 void do_vfo(void);
 void do_step(void);
+
+void do_sub_encoder(int change);
+void do_main_encoder(int change);

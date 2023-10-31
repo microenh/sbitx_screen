@@ -11,6 +11,7 @@
 		"files.associations": {
 			"libgen.h": "c",
 			"stdbool.h": "c"
-		}
+		},
+		"cmake.generator": "Ninja"
 	}
 }
