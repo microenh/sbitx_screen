@@ -69,6 +69,7 @@ static GtkEntry* ent_command;
 
 static GtkWidget *window;
 
+static GtkStyleContext *highlight[se_END];
 
 void init_display(int argc, char **argv) {
 	gtk_init(&argc, &argv); // init Gtk
@@ -121,7 +122,18 @@ void init_display(int argc, char **argv) {
 	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
 								GTK_STYLE_PROVIDER(css_provider),
 								GTK_STYLE_PROVIDER_PRIORITY_USER);
-	
+    
+    highlight[se_af] = gtk_widget_get_style_context(GTK_WIDGET(lbl_af));
+    highlight[se_high] = gtk_widget_get_style_context(GTK_WIDGET(lbl_high));
+    highlight[se_low] = gtk_widget_get_style_context(GTK_WIDGET(lbl_low));
+    highlight[se_if] = gtk_widget_get_style_context(GTK_WIDGET(lbl_if));
+    highlight[se_pitch] = gtk_widget_get_style_context(GTK_WIDGET(lbl_pitch));
+    highlight[se_wpm] = gtk_widget_get_style_context(GTK_WIDGET(lbl_wpm));
+    highlight[se_comp] = gtk_widget_get_style_context(GTK_WIDGET(lbl_comp));
+    highlight[se_mic] = gtk_widget_get_style_context(GTK_WIDGET(lbl_mic));
+    highlight[se_power] = gtk_widget_get_style_context(GTK_WIDGET(lbl_power));
+
+
 	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     gtk_builder_connect_signals(builder, NULL);
 
@@ -170,15 +182,15 @@ void update_if(int level) {update_label_int(lbl_if, level);}
 void update_af(int level) {update_label_int(lbl_af, level);}
 void update_rx_tx(bool rx_tx) {gtk_button_set_label(btn_rx_tx, rx_txs[rx_tx]);}
 
-void enable_high(bool enable) {gtk_widget_set_sensitive(GTK_WIDGET(btn_high), enable);}
-void enable_low(bool enable) {gtk_widget_set_sensitive(GTK_WIDGET(btn_low), enable);}
-void enable_af(bool enable) {gtk_widget_set_sensitive(GTK_WIDGET(btn_af), enable);}
-void enable_if(bool enable) {gtk_widget_set_sensitive(GTK_WIDGET(btn_if), enable);}
-void enable_pitch(bool enable) {gtk_widget_set_sensitive(GTK_WIDGET(btn_pitch), enable);}
-void enable_wpm(bool enable) {gtk_widget_set_sensitive(GTK_WIDGET(btn_wpm), enable);}
-void enable_comp(bool enable) {gtk_widget_set_sensitive(GTK_WIDGET(btn_comp), enable);}
-void enable_mic(bool enable) {gtk_widget_set_sensitive(GTK_WIDGET(btn_mic), enable);}
-void enable_power(bool enable) {gtk_widget_set_sensitive(GTK_WIDGET(btn_power), enable);}
+
+void enable_highlight(SmEncoder item, bool on) {
+    static void (* fn[])(GtkStyleContext *, const gchar *) = {
+        gtk_style_context_remove_class,
+        gtk_style_context_add_class
+    };
+    fn[on](highlight[item], "highlight");
+} 
+
 
 void btn_quit_clicked_cb(GtkButton *b) {
 	gtk_main_quit();
@@ -189,15 +201,15 @@ void btn_minimize_clicked_cb(GtkButton *b) {
 }
 
 
-void btn_high_clicked_cb(GtkButton *b) {do_high();}
-void btn_low_clicked_cb(GtkButton *b) {do_low();}
-void btn_af_clicked_cb(GtkButton *b) {do_af();}
-void btn_if_clicked_cb(GtkButton *b) {do_if();}
-void btn_pitch_clicked_cb(GtkButton *b) {do_pitch();}
-void btn_wpm_clicked_cb(GtkButton *b) {do_wpm();}
-void btn_comp_clicked_cb(GtkButton *b) {do_comp();}
-void btn_mic_clicked_cb(GtkButton *b) {do_mic();}
-void btn_power_clicked_cb(GtkButton *b) {do_power();}
+void btn_high_clicked_cb(GtkButton *b) {select_small_encoder(se_high);}
+void btn_low_clicked_cb(GtkButton *b) {select_small_encoder(se_low);}
+void btn_af_clicked_cb(GtkButton *b) {select_small_encoder(se_af);}
+void btn_if_clicked_cb(GtkButton *b) {select_small_encoder(se_if);}
+void btn_pitch_clicked_cb(GtkButton *b) {select_small_encoder(se_pitch);}
+void btn_wpm_clicked_cb(GtkButton *b) {select_small_encoder(se_wpm);}
+void btn_comp_clicked_cb(GtkButton *b) {select_small_encoder(se_comp);}
+void btn_mic_clicked_cb(GtkButton *b) {select_small_encoder(se_mic);}
+void btn_power_clicked_cb(GtkButton *b) {select_small_encoder(se_power);}
 
 void btn_10m_clicked_cb(GtkButton *b) {do_10m();}
 void btn_12m_clicked_cb(GtkButton *b) {do_12m();}

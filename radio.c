@@ -16,19 +16,10 @@ typedef struct _radio {
     bool split;
     bool record;
     bool rx_tx;
+    SmEncoder smEncoder;
 } Radio;
 
 static Radio radio;
-
-void do_high(void) {enable_high(false);}
-void do_low(void) {enable_low(false);}
-void do_af(void) {enable_af(false);}
-void do_if(void) {enable_if(false);}
-void do_pitch(void) {enable_pitch(false);}
-void do_wpm(void) {enable_wpm(false);}
-void do_comp(void) {enable_comp(false);}
-void do_mic(void) {enable_mic(false);}
-void do_power(void) {enable_power(false);}
 
 void do_10m(void) {}
 void do_12m(void) {}
@@ -49,6 +40,7 @@ void init_radio(void) {
     update_split(radio.split);
     update_record(radio.record);
     update_rx_tx(radio.rx_tx);
+    enable_highlight(radio.smEncoder, true);
 }
 
 void do_agc(void) {
@@ -109,4 +101,11 @@ void do_record(void) {
 void do_rx_tx(void) {
     radio.rx_tx = !radio.rx_tx;
     update_rx_tx(radio.rx_tx);
+}
+
+
+void select_small_encoder(SmEncoder item) {
+    enable_highlight(radio.smEncoder, false);
+    radio.smEncoder = item;
+    enable_highlight(radio.smEncoder, true);    
 }

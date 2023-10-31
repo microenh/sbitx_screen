@@ -33,12 +33,4 @@ void update_high(int frequncy);
 void update_if(int level);
 void update_af(int level);
 
-void enable_high(bool enable);
-void enable_low(bool enable);
-void enable_af(bool enable);
-void enable_if(bool enable);
-void enable_pitch(bool enable);
-void enable_wpm(bool enable);
-void enable_comp(bool enable);
-void enable_mic(bool enable);
-void enable_power(bool enable);
+void enable_highlight(SmEncoder item, bool on); 

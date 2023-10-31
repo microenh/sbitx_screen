@@ -1,16 +1,10 @@
 #pragma once
 
+#include "settings.h"
+
 void init_radio(void);
 
-void do_high(void);
-void do_low(void);
-void do_af(void);
-void do_if(void);
-void do_pitch(void);
-void do_wpm(void);
-void do_comp(void);
-void do_mic(void);
-void do_power(void);
+void select_small_encoder(SmEncoder item);
 
 void do_agc(void);
 void do_mode(void);

@@ -10,22 +10,18 @@
     color: white;
     background: black;
     border: 1px solid lightgray;
+    padding: 4px;
     margin: 1px 1px 0px 0px;
     border-radius: 5px;
 }
 
 .main button:hover {
-    background: darkgray;
+    background: darkslategray;
 }
 
 .main button:active {
     color: black;
     background: white;
-}
-
-.main button:disabled {
-    color: black;
-    background: darkgray;
 }
 
 .main entry {
@@ -37,3 +33,8 @@
     font-size: 10px;
 }
 
+.highlight {
+    color: black;
+    background: yellow;
+    border-radius: 3px;
+}

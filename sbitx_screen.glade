@@ -1075,6 +1075,9 @@
                         </child>
                       </object>
                     </child>
+                    <style>
+                      <class name="green"/>
+                    </style>
                   </object>
                   <packing>
                     <property name="left-attach">7</property>
