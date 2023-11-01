@@ -277,7 +277,7 @@
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can-focus">False</property>
-                    <property name="margin-end">4</property>
+                    <property name="margin-end">5</property>
                     <property name="hexpand">True</property>
                     <property name="orientation">vertical</property>
                     <child>
@@ -292,6 +292,9 @@
                             <property name="sensitive">False</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">B</property>
+                            <style>
+                              <class name="fixed"/>
+                            </style>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -300,7 +303,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="lbl_vfob">
+                          <object class="GtkLabel" id="lbl_vfob_frequency">
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
                             <property name="can-focus">False</property>
@@ -309,11 +312,12 @@
                             <property name="hexpand">True</property>
                             <property name="label" translatable="yes">14 074 00</property>
                             <property name="justify">right</property>
-                            <property name="width-chars">9</property>
+                            <property name="width-chars">11</property>
                             <property name="track-visited-links">False</property>
-                            <attributes>
-                              <attribute name="gravity" value="west"/>
-                            </attributes>
+                            <property name="xalign">1</property>
+                            <style>
+                              <class name="fixed"/>
+                            </style>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -322,7 +326,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="lbl_modeb">
+                          <object class="GtkLabel" id="lbl_vfob_mode">
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
                             <property name="can-focus">False</property>
@@ -330,6 +334,10 @@
                             <property name="label" translatable="yes">USB</property>
                             <property name="justify">right</property>
                             <property name="width-chars">4</property>
+                            <property name="xalign">1</property>
+                            <style>
+                              <class name="fixed"/>
+                            </style>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -357,6 +365,9 @@
                             <property name="sensitive">False</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">A</property>
+                            <style>
+                              <class name="fixed"/>
+                            </style>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -365,7 +376,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="lbl_vfoa">
+                          <object class="GtkLabel" id="lbl_vfoa_frequency">
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
                             <property name="can-focus">False</property>
@@ -374,11 +385,12 @@
                             <property name="hexpand">True</property>
                             <property name="label" translatable="yes">7 150 00</property>
                             <property name="justify">right</property>
-                            <property name="width-chars">9</property>
+                            <property name="width-chars">11</property>
                             <property name="track-visited-links">False</property>
-                            <attributes>
-                              <attribute name="gravity" value="west"/>
-                            </attributes>
+                            <property name="xalign">1</property>
+                            <style>
+                              <class name="fixed"/>
+                            </style>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -387,13 +399,17 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel">
+                          <object class="GtkLabel" id="lbl_vfoa_mode">
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
                             <property name="can-focus">False</property>
                             <property name="halign">end</property>
                             <property name="label" translatable="yes">USB</property>
                             <property name="width-chars">4</property>
+                            <property name="xalign">1</property>
+                            <style>
+                              <class name="fixed"/>
+                            </style>
                           </object>
                           <packing>
                             <property name="expand">False</property>

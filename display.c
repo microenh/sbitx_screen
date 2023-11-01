@@ -43,8 +43,10 @@ static GtkLabel
     *lbl_split,
     *lbl_step,
     *lbl_vfo,
-    *lbl_vfoa,
-    *lbl_vfob,
+    *lbl_vfoa_frequency,
+    *lbl_vfob_frequency,
+    *lbl_vfoa_mode,
+    *lbl_vfob_mode,
     // -----
     *lbl_af,
     *lbl_comp,
@@ -76,6 +78,10 @@ static GtkWidget *window;
 
 static GtkStyleContext *highlight[se_END];
 static GtkLabel *level[se_END];
+static GtkLabel *vfo_frequency[v_END];
+static GtkLabel *vfo_mode[v_END];
+static GtkStyleContext *vfo_state_context[v_END];
+
 
 #define SUB_RESET 10
 
@@ -134,8 +140,10 @@ void init_display(int argc, char **argv) {
     lbl_vfo = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfo"));
     lbl_span = GTK_LABEL(gtk_builder_get_object(builder, "lbl_span"));
     lbl_rit = GTK_LABEL(gtk_builder_get_object(builder, "lbl_rit"));
-    lbl_vfob = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfob"));
-    lbl_vfoa = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfoa"));
+    lbl_vfob_frequency = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfob_frequency"));
+    lbl_vfoa_frequency = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfoa_frequency"));
+    lbl_vfob_mode = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfob_mode"));
+    lbl_vfoa_mode = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfoa_mode"));
     lbl_date = GTK_LABEL(gtk_builder_get_object(builder, "lbl_date"));
     lbl_record = GTK_LABEL(gtk_builder_get_object(builder, "lbl_record"));
     lbl_split = GTK_LABEL(gtk_builder_get_object(builder, "lbl_split"));
@@ -189,6 +197,15 @@ void init_display(int argc, char **argv) {
     level[se_power] = lbl_power;
     level[se_wpm] = lbl_wpm;
 
+    vfo_frequency[v_A] = lbl_vfoa_frequency;
+    vfo_frequency[v_B] = lbl_vfob_frequency;
+
+    vfo_mode[v_A] = lbl_vfoa_mode;
+    vfo_mode[v_B] = lbl_vfob_mode;
+
+    vfo_state_context[v_A] = gtk_widget_get_style_context(GTK_WIDGET(lbl_vfoa_frequency));
+    vfo_state_context[v_B] = gtk_widget_get_style_context(GTK_WIDGET(lbl_vfob_frequency));
+
     init_gpio_pins();
     g_timeout_add(125, heartbeat, NULL);
 
@@ -210,14 +227,6 @@ void update_mode(Mode mode) {gtk_label_set_text(lbl_mode, modes[mode]);}
 void update_agc(Agc agc) {gtk_label_set_text(lbl_agc, agcs[agc]);}
 void update_vfo(Vfo vfo) {gtk_label_set_text(lbl_vfo, vfos[vfo]);}
 
-static void update_vfo_text(GtkLabel *label, char vfo_id, int frequency, Mode mode) {
-    char temp[30];
-    sprintf(temp, "VFO %c: %d %s", vfo_id, frequency, modes[mode]);
-    gtk_label_set_text(label, temp);
-}
-
-void update_vfoa(int frequency, Mode mode) {update_vfo_text(lbl_vfoa, 'A', frequency, mode);}
-void update_vfob(int frequency, Mode mode) {update_vfo_text(lbl_vfob, 'B', frequency, mode);}
 
 void update_split(bool on) {gtk_label_set_text(lbl_split, off_on[on]);}
 void update_rit(bool on) {gtk_label_set_text(lbl_rit, off_on[on]);}
@@ -232,19 +241,50 @@ void update_level(SubEncoder item, int value) {
 
 void update_rx_tx(bool rx_tx) {gtk_button_set_label(btn_rx_tx, rx_txs[rx_tx]);}
 
+static void (* add_class[])(GtkStyleContext *, const gchar *) = {
+    gtk_style_context_remove_class,
+    gtk_style_context_add_class
+};
+
 
 void enable_highlight(SubEncoder item, bool on) {
-    static void (* fn[])(GtkStyleContext *, const gchar *) = {
-        gtk_style_context_remove_class,
-        gtk_style_context_add_class
-    };
-    fn[on](highlight[item], "highlight");
+    add_class[on](highlight[item], "highlight");
 } 
 
 
 void btn_quit_clicked_cb(GtkButton *b) {
 	gtk_main_quit();
 }
+
+void update_vfo_frequency(Vfo vfo, int frequency) {
+    char temp[20];
+    sprintf(temp, "%2d.%03d.%03d", frequency / 1000000, (frequency / 1000) % 1000, frequency % 1000);
+    gtk_label_set_text(vfo_frequency[vfo], temp);
+}
+
+void update_vfo_mode(Vfo vfo, Mode mode) {
+    gtk_label_set_text(vfo_mode[vfo], modes[mode]);
+}
+
+void update_vfo_state(Vfo vfo, VfoState new_vfoState) {
+    static VfoState saved_vfoState[] = {
+        vs_END,
+        vs_END
+    };
+    const char *VFO_STATE[] = {
+        "vfo_inactive",
+        "vfo_tx_inactive",
+        "vfo_rx_inactive",
+        "vfo_tx_active",
+        "vfo_rx_active"
+    };
+    if (saved_vfoState[vfo] != vs_END) {
+        add_class[false](vfo_state_context[vfo], VFO_STATE[saved_vfoState[vfo]]);
+    }
+    add_class[true](vfo_state_context[vfo], VFO_STATE[new_vfoState]);
+    saved_vfoState[vfo] = new_vfoState;
+}
+
 
 void btn_minimize_clicked_cb(GtkButton *b) {
     gtk_window_iconify(GTK_WINDOW(window));

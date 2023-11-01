@@ -16,8 +16,9 @@ void update_mode(Mode mode);
 void update_agc(Agc agc);
 void update_vfo(Vfo vfo);
 
-void update_vfoa(int frequency, Mode mode);
-void update_vfob(int frequency, Mode mode);
+void update_vfo_frequency(Vfo vfo, int frequency);
+void update_vfo_mode(Vfo vfo, Mode mode);
+void update_vfo_state(Vfo vfo, VfoState vfoState);
 
 void update_split(bool on);
 void update_record(bool on);

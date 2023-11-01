@@ -1,9 +1,10 @@
 #pragma once
 
-extern char *steps[];
-extern char *spans[];
-extern char *modes[];
-extern char *agcs[];
-extern char *vfos[];
-extern char *off_on[];
-extern char *rx_txs[];
+extern const char *steps[];
+extern const char *spans[];
+extern const char *modes[];
+extern const char *agcs[];
+extern const char *vfos[];
+extern const char *off_on[];
+extern const char *rx_txs[];
+extern const int step_values[];

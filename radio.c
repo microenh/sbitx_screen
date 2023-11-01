@@ -8,7 +8,8 @@
 
 typedef struct _radio {
     Agc agc;
-    Mode mode;
+    Mode mode[v_END];
+    int frequency[v_END];
     Span span;
     Vfo vfo;
     Step step;
@@ -17,7 +18,7 @@ typedef struct _radio {
     bool record;
     bool rx_tx;
     SubEncoder subEncoder;
-    int level[se_END];
+    int level[se_END];   
 } Radio;
 
 static Radio radio;
@@ -39,7 +40,7 @@ static const int subEncoderStep[] = {  1,    1,   50,   1,   50,   1,    10,    
 
 void init_radio(void) {
     update_agc(radio.agc);
-    update_mode(radio.mode);
+    update_mode(radio.mode[radio.vfo]);
     update_span(radio.span);
     update_vfo(radio.vfo);
     update_step(radio.step);
@@ -52,6 +53,14 @@ void init_radio(void) {
         radio.level[i] = subEncoderInit[i];
         update_level(i, radio.level[i]);
     }
+    for (int i=0; i<v_END; i++) {
+        radio.frequency[i] = 7000000;
+        update_vfo_frequency(i, radio.frequency[i]);
+        radio.mode[i] = m_lsb;
+        update_vfo_mode(i, radio.mode[i]);
+    }
+    update_vfo_state(v_A, vs_rx_active);
+    update_vfo_state(v_B, vs_inactive);
 }
 
 void do_agc(void) {
@@ -63,11 +72,12 @@ void do_agc(void) {
 }
 
 void do_mode(void) {
-    radio.mode++;
-    if (radio.mode >= m_END) {
-        radio.mode = 0;
-    }
-    update_mode(radio.mode);
+    Mode new_mode = radio.mode[radio.vfo] + 1;
+    if (new_mode >= m_END)
+        new_mode = 0;
+    radio.mode[radio.vfo] = new_mode;
+    update_mode(new_mode);
+    update_vfo_mode(radio.vfo, new_mode);
 }
 
 void do_span(void) {
@@ -92,6 +102,11 @@ void do_step(void) {
         radio.step = 0;
     }
     update_step(radio.step);
+    int adj = radio.frequency[radio.vfo] % step_values[radio.step];
+    if (adj) {
+        radio.frequency[radio.vfo] -= adj;
+        update_vfo_frequency(radio.vfo, radio.frequency[radio.vfo]);
+    }
 }
 
 void do_rit(void) {
@@ -123,9 +138,6 @@ void select_small_encoder(SubEncoder item) {
     }  
 }
 
-
-
-
 void do_sub_encoder(int change) {
     int rse = radio.subEncoder;
     int min = subEncoderMin[rse];
@@ -149,5 +161,15 @@ void do_sub_encoder(int change) {
 }
 
 void do_main_encoder(int change) {
-
+    const int FREQ_MIN = 1000;
+    const int FREQ_MAX = 30000000;
+    int frequency = radio.frequency[radio.vfo] + step_values[radio.step] * change;
+    if (frequency < FREQ_MIN)
+        frequency = FREQ_MIN;
+    else if (frequency > FREQ_MAX)
+        frequency = FREQ_MAX;
+    if (frequency != radio.frequency[radio.vfo]) {
+        radio.frequency[radio.vfo] = frequency;
+        update_vfo_frequency(radio.vfo, frequency);
+    }
 }

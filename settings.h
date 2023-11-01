@@ -55,3 +55,11 @@ typedef enum _subEncoder {
     se_END
 } SubEncoder;
 
+typedef enum _vfoState {
+    vs_inactive,
+    vs_tx_inactive,
+    vs_rx_inactive,
+    vs_tx_active,
+    vs_rx_active,
+    vs_END
+} VfoState;

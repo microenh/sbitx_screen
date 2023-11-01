@@ -7,8 +7,8 @@
 #define ENC1_B  (12)
 #define ENC1_SW (14)
 
-#define ENC2_A  (0)
-#define ENC2_B  (2)
+#define ENC2_A  (2)
+#define ENC2_B  (0)
 #define ENC2_SW (3)
 
 Rotary
