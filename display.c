@@ -108,6 +108,10 @@ int heartbeat(gpointer data) {
         level_ticks = 0;
         sub_reset = SUB_RESET;
     }
+    if (tuning_ticks) {
+        do_main_encoder(tuning_ticks);
+        tuning_ticks = 0;
+    }
     return true;
 }
 

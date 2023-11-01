@@ -11,6 +11,7 @@ extern Rotary rotary_sub;
 extern Rotary rotary_main;
 
 extern volatile int level_ticks;
+extern volatile int tuning_ticks;
 
 int check_rotary(Rotary *rotary);
 void init_gpio_pins(void);

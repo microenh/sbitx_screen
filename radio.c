@@ -31,6 +31,12 @@ void do_30m(void) {}
 void do_40m(void) {}
 void do_80m(void) {}
 
+//                                    af, comp, high,  if,  low, mic, pitch, power, wpm
+static const int subEncoderMin[]  = {  0,    0,    0,   0,    0,   0,   300,     0,   5};
+static const int subEncoderInit[] = { 50,    0, 3000,  50,  200,  50,   600,     0,  13};
+static const int subEncoderMax[]  = {100,  100, 4000, 100, 1000, 100,  1500,   100,  40};
+static const int subEncoderStep[] = {  1,    1,   50,   1,   50,   1,    10,     1,   1};
+
 void init_radio(void) {
     update_agc(radio.agc);
     update_mode(radio.mode);
@@ -42,8 +48,10 @@ void init_radio(void) {
     update_record(radio.record);
     update_rx_tx(radio.rx_tx);
     enable_highlight(radio.subEncoder, true);
-    for (int i=0; i<se_END; i++)
+    for (int i=0; i<se_END; i++) {
+        radio.level[i] = subEncoderInit[i];
         update_level(i, radio.level[i]);
+    }
 }
 
 void do_agc(void) {
@@ -116,19 +124,27 @@ void select_small_encoder(SubEncoder item) {
 }
 
 
-// af, comp, high, if, low, mic, pitch, power, wpm
-const int subEncoderMin[] = {  0,   0,    0,   0,    0,   0,    0,   0,  5};
-const int subEncoderMax[] = {100, 100, 4000, 100, 1000, 100, 1500, 100, 40};
+
 
 void do_sub_encoder(int change) {
-    int i = radio.level[radio.subEncoder] + change;
-    if (i < subEncoderMin[radio.subEncoder])
-        i = subEncoderMin[radio.subEncoder];
-    else if (i > subEncoderMax[radio.subEncoder])
-        i = subEncoderMax[radio.subEncoder];    
-    if (i != radio.level[radio.subEncoder]) {
-        radio.level[radio.subEncoder] = i;
-        update_level(radio.subEncoder, i);
+    int rse = radio.subEncoder;
+    int min = subEncoderMin[rse];
+    int max = subEncoderMax[rse];
+    int step = subEncoderStep[rse];
+    int i = radio.level[radio.subEncoder] + change * step;
+    if (rse == se_high) {
+        min = radio.level[se_low] + step;
+    }
+    if (rse == se_low) {
+        max = radio.level[se_high] - step;
+    }
+    if (i < min)
+        i = min;
+    else if (i > max)
+        i = max;    
+    if (i != radio.level[rse]) {
+        radio.level[rse] = i;
+        update_level(rse, i);
     }
 }
 

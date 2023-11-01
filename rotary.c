@@ -22,7 +22,7 @@ int check_rotary(Rotary *rotary) {
         rotary->old_pina = pin_a;
         if (pin_a) {
             if (pin_b != rotary->b_a_down) {
-                return (pin_b ? -1 : 1);
+                return (pin_b ? 1 : -1);
             }
         } else {
             rotary->b_a_down = pin_b;
@@ -32,15 +32,15 @@ int check_rotary(Rotary *rotary) {
 }
 
 volatile int level_ticks;
+volatile int tuning_ticks;
 
 static void level_isr(void){
-	int level = check_rotary(&rotary_sub);
-	if (level < 0)
-		level_ticks++;
-	else if (level > 0)
-		level_ticks--;	
+	level_ticks += check_rotary(&rotary_sub);
 }
 
+static void tuning_isr(void){
+	tuning_ticks += check_rotary(&rotary_main);
+}
 
 void init_gpio_pins(void) {
     // this requires wiringpi 2.61 (unoffical mods)
@@ -66,5 +66,5 @@ void init_gpio_pins(void) {
         i++;
     }
 	wiringPiISR(ENC1_A, INT_EDGE_BOTH, level_isr);
-	wiringPiISR(ENC1_B, INT_EDGE_BOTH, level_isr);
+	wiringPiISR(ENC2_A, INT_EDGE_BOTH, tuning_isr);
 }
