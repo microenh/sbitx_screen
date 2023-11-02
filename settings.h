@@ -63,3 +63,15 @@ typedef enum _vfoState {
     vs_rx_active,
     vs_END
 } VfoState;
+
+typedef enum _band {
+    b_10m,
+    b_12m,
+    b_15m,
+    b_17m,
+    b_20m,
+    b_30m,
+    b_40m,
+    b_80m,
+    b_END
+} Band;

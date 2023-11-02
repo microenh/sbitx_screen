@@ -24,5 +24,6 @@ void update_split(bool on);
 void update_record(bool on);
 void update_rit(bool on);
 void update_rx_tx(bool rx_tx);
+void update_rx_tx_state(bool tx);
 
 void enable_highlight(SubEncoder item, bool on); 

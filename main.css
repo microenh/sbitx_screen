@@ -40,15 +40,15 @@
 }
 
 .vfo_inactive {
-    color: gray;
+    color: #3f3f3f;
 }
 
 .vfo_tx_inactive {
-    color: yellowgreen;
+    color: #3f0000;
 }
 
 .vfo_rx_inactive {
-    color: green;
+    color: #3f3f00;
 }
 
 .vfo_tx_active {
@@ -56,9 +56,10 @@
 }
 
 .vfo_rx_active {
-    color: yellow;
+    color: #ffff00;
 }
 
 .fixed {
     font-family: monospace;
 }
+

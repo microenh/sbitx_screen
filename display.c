@@ -56,11 +56,10 @@ static GtkLabel
     *lbl_mic,
     *lbl_pitch,
     *lbl_power,
-    *lbl_wpm;
+    *lbl_wpm,
+    *lbl_rx_tx;
 
 static GtkButton
-    *btn_rx_tx,
-    // -----
     *btn_af,
     *btn_comp,
     *btn_high,
@@ -81,6 +80,7 @@ static GtkLabel *level[se_END];
 static GtkLabel *vfo_frequency[v_END];
 static GtkLabel *vfo_mode[v_END];
 static GtkStyleContext *vfo_state_context[v_END];
+static GtkStyleContext *rx_tx_context;
 
 
 #define SUB_RESET 10
@@ -159,6 +159,7 @@ void init_display(int argc, char **argv) {
     lbl_agc = GTK_LABEL(gtk_builder_get_object(builder, "lbl_agc"));
     lbl_if = GTK_LABEL(gtk_builder_get_object(builder, "lbl_if"));
     lbl_af = GTK_LABEL(gtk_builder_get_object(builder, "lbl_af"));
+    lbl_rx_tx = GTK_LABEL(gtk_builder_get_object(builder, "lbl_rx_tx"));
 
     btn_high = GTK_BUTTON(gtk_builder_get_object(builder, "btn_high"));
     btn_low = GTK_BUTTON(gtk_builder_get_object(builder, "btn_low"));
@@ -169,7 +170,6 @@ void init_display(int argc, char **argv) {
     btn_comp = GTK_BUTTON(gtk_builder_get_object(builder, "btn_comp"));
     btn_mic = GTK_BUTTON(gtk_builder_get_object(builder, "btn_mic"));
     btn_power = GTK_BUTTON(gtk_builder_get_object(builder, "btn_power"));
-    btn_rx_tx = GTK_BUTTON(gtk_builder_get_object(builder, "btn_rx_tx"));
 
     ent_command = GTK_ENTRY(gtk_builder_get_object(builder, "ent_command"));
 
@@ -206,6 +206,8 @@ void init_display(int argc, char **argv) {
     vfo_state_context[v_A] = gtk_widget_get_style_context(GTK_WIDGET(lbl_vfoa_frequency));
     vfo_state_context[v_B] = gtk_widget_get_style_context(GTK_WIDGET(lbl_vfob_frequency));
 
+    rx_tx_context = gtk_widget_get_style_context(GTK_WIDGET(lbl_rx_tx));
+
     init_gpio_pins();
     g_timeout_add(125, heartbeat, NULL);
 
@@ -239,7 +241,7 @@ void update_level(SubEncoder item, int value) {
 }
 
 
-void update_rx_tx(bool rx_tx) {gtk_button_set_label(btn_rx_tx, rx_txs[rx_tx]);}
+void update_rx_tx(bool rx_tx) {gtk_label_set_text(lbl_rx_tx, rx_txs[rx_tx]);}
 
 static void (* add_class[])(GtkStyleContext *, const gchar *) = {
     gtk_style_context_remove_class,
@@ -266,18 +268,20 @@ void update_vfo_mode(Vfo vfo, Mode mode) {
     gtk_label_set_text(vfo_mode[vfo], modes[mode]);
 }
 
+const char *VFO_STATE[] = {
+    "vfo_inactive",
+    "vfo_tx_inactive",
+    "vfo_rx_inactive",
+    "vfo_tx_active",
+    "vfo_rx_active"
+};
+
 void update_vfo_state(Vfo vfo, VfoState new_vfoState) {
     static VfoState saved_vfoState[] = {
         vs_END,
         vs_END
     };
-    const char *VFO_STATE[] = {
-        "vfo_inactive",
-        "vfo_tx_inactive",
-        "vfo_rx_inactive",
-        "vfo_tx_active",
-        "vfo_rx_active"
-    };
+    if (new_vfoState == saved_vfoState[vfo]) return;
     if (saved_vfoState[vfo] != vs_END) {
         add_class[false](vfo_state_context[vfo], VFO_STATE[saved_vfoState[vfo]]);
     }
@@ -295,6 +299,16 @@ static void call_select_small_encoder(SubEncoder item) {
     select_small_encoder(item);
 }
 
+void update_rx_tx_state(bool tx) {
+    static VfoState saved_rx_tx_state = vs_END;
+    VfoState new_rx_tx_state = tx ? vs_tx_active : vs_rx_active;
+    if (new_rx_tx_state == saved_rx_tx_state) return;
+    if (saved_rx_tx_state != vs_END) {
+        add_class[false](rx_tx_context, VFO_STATE[saved_rx_tx_state]);
+    }
+    add_class[true](rx_tx_context, VFO_STATE[new_rx_tx_state]);
+    saved_rx_tx_state = new_rx_tx_state;
+}
 void btn_high_clicked_cb(GtkButton *b) {call_select_small_encoder(se_high);}
 void btn_low_clicked_cb(GtkButton *b) {call_select_small_encoder(se_low);}
 void btn_af_clicked_cb(GtkButton *b) {call_select_small_encoder(se_af);}
@@ -305,14 +319,14 @@ void btn_comp_clicked_cb(GtkButton *b) {call_select_small_encoder(se_comp);}
 void btn_mic_clicked_cb(GtkButton *b) {call_select_small_encoder(se_mic);}
 void btn_power_clicked_cb(GtkButton *b) {call_select_small_encoder(se_power);}
 
-void btn_10m_clicked_cb(GtkButton *b) {do_10m();}
-void btn_12m_clicked_cb(GtkButton *b) {do_12m();}
-void btn_15m_clicked_cb(GtkButton *b) {do_15m();}
-void btn_17m_clicked_cb(GtkButton *b) {do_17m();}
-void btn_20m_clicked_cb(GtkButton *b) {do_20m();}
-void btn_30m_clicked_cb(GtkButton *b) {do_30m();}
-void btn_40m_clicked_cb(GtkButton *b) {do_40m();}
-void btn_80m_clicked_cb(GtkButton *b) {do_80m();}
+void btn_10m_clicked_cb(GtkButton *b) {do_band(b_10m);}
+void btn_12m_clicked_cb(GtkButton *b) {do_band(b_12m);}
+void btn_15m_clicked_cb(GtkButton *b) {do_band(b_15m);}
+void btn_17m_clicked_cb(GtkButton *b) {do_band(b_17m);}
+void btn_20m_clicked_cb(GtkButton *b) {do_band(b_20m);}
+void btn_30m_clicked_cb(GtkButton *b) {do_band(b_30m);}
+void btn_40m_clicked_cb(GtkButton *b) {do_band(b_40m);}
+void btn_80m_clicked_cb(GtkButton *b) {do_band(b_80m);}
 
 void btn_agc_clicked_cb(GtkButton *b) {do_agc();}
 void btn_mode_clicked_cb(GtkButton *b) {do_mode();}

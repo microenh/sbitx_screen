@@ -8,7 +8,7 @@ The large encoder (main encoder) adjusts the frequency of either the A or B VFO 
 
 The small encoder (sub-encoder) controls the AF, IF, LOW, HIGH, MIC, COMP, WPM, PITCH and PWR settings.
 
-Click on the desired button, the value will highlight in yellow and the sub-encoder will adjust the value. After 10 seconds of sub-encoder activity, the highlight will return to the AF and the sub-encoder will adjust the AF (default) value.
+Click on the desired button, the value will highlight in yellow and the sub-encoder will adjust the value. After 10 seconds of sub-encoder inactivity, the highlight will return to the AF and the sub-encoder will adjust the AF (default) value.
 
 * **AF**: range 0 .. 100 (step size 1)
 * **IF**: range 0 .. 100 (step size 1)
