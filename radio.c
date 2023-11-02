@@ -113,7 +113,7 @@ void do_band(Band band) {
             .comp = radio.level[se_comp],
             .power = radio.level[se_power],
             .step = radio.step,
-            .span = radio.span
+            .span = radio.span,
         };
         radio.bandStack[cur_band].bandStackEntry[tos] = bse;        
     }
