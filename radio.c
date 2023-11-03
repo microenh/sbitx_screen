@@ -82,7 +82,7 @@ static void update_display(void) {
     update_record(radio.record);
     update_rx_tx(radio.rx_tx);
     update_rx_tx_state(radio.rx_tx);
-    enable_highlight(radio.subEncoder, true);
+    update_level_highlight(radio.subEncoder, true);
     for (int i=0; i<se_END; i++) {
         update_level(i, radio.level[i]);
     }
@@ -269,9 +269,9 @@ void do_rx_tx(void) {
 
 void select_sub_encoder(SubEncoder item) {
     if (item != radio.subEncoder) {
-        enable_highlight(radio.subEncoder, false);
+        update_level_highlight(radio.subEncoder, false);
         radio.subEncoder = item;
-        enable_highlight(radio.subEncoder, true);  
+        update_level_highlight(radio.subEncoder, true);  
     }  
 }
 

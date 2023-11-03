@@ -193,7 +193,7 @@ void update_rx_tx(bool rx_tx) {gtk_label_set_text(lbl_rx_tx, rx_txs[rx_tx]);}
 
 // Handle CSS changes
 
-void enable_highlight(SubEncoder item, bool on) {
+void update_level_highlight(SubEncoder item, bool on) {
     update_css(GTK_WIDGET(level[item]), on ? css_highlight : css_END);
 } 
 
