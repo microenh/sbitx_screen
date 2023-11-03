@@ -4,7 +4,7 @@
 
 void init_radio(void);
 
-void select_small_encoder(SubEncoder item);
+void select_sub_encoder(SubEncoder item);
 
 void do_agc(void);
 void do_mode(void);

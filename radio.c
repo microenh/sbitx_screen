@@ -267,7 +267,7 @@ void do_rx_tx(void) {
 }
 
 
-void select_small_encoder(SubEncoder item) {
+void select_sub_encoder(SubEncoder item) {
     if (item != radio.subEncoder) {
         enable_highlight(radio.subEncoder, false);
         radio.subEncoder = item;

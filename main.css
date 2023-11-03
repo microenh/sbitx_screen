@@ -1,3 +1,5 @@
+/* assigned by Glade */
+
 .main {
     font-size: 18px;
     color: white;
@@ -33,33 +35,36 @@
     font-size: 10px;
 }
 
+.fixed {
+    font-family: monospace;
+}
+
+/* manipulated in code */
+
 .highlight {
     color: black;
     background: yellow;
     border-radius: 3px;
 }
 
-.vfo_inactive {
+.inactive {
     color: #3f3f3f;
 }
 
-.vfo_tx_inactive {
+.tx_inactive {
     color: #3f0000;
 }
 
-.vfo_rx_inactive {
+.rx_inactive {
     color: #3f3f00;
 }
 
-.vfo_tx_active {
+.tx_active {
     color: red;
 }
 
-.vfo_rx_active {
+.rx_active {
     color: #ffff00;
 }
 
-.fixed {
-    font-family: monospace;
-}
 

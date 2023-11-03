@@ -8,6 +8,7 @@
 #include "radio.h"
 #include "settings.h"
 #include "rotary.h"
+#include "update_css.h"
 
 #define GLADE "sbitx_screen.glade"
 #define CSS "main.css"
@@ -43,44 +44,15 @@ static GtkLabel
     *lbl_split,
     *lbl_step,
     *lbl_vfo,
-    *lbl_vfoa_frequency,
-    *lbl_vfob_frequency,
-    *lbl_vfoa_mode,
-    *lbl_vfob_mode,
-    // -----
-    *lbl_af,
-    *lbl_comp,
-    *lbl_high,
-    *lbl_if,
-    *lbl_low,
-    *lbl_mic,
-    *lbl_pitch,
-    *lbl_power,
-    *lbl_wpm,
     *lbl_rx_tx;
-
-static GtkButton
-    *btn_af,
-    *btn_comp,
-    *btn_high,
-    *btn_if,
-    *btn_low,
-    *btn_mic,
-    *btn_pitch,
-    *btn_power,
-    *btn_wpm;
-
 
 static GtkEntry* ent_command;
 
 static GtkWidget *window;
 
-static GtkStyleContext *highlight[se_END];
 static GtkLabel *level[se_END];
 static GtkLabel *vfo_frequency[v_END];
 static GtkLabel *vfo_mode[v_END];
-static GtkStyleContext *vfo_state_context[v_END];
-static GtkStyleContext *rx_tx_context;
 
 
 #define SUB_RESET 10
@@ -105,7 +77,7 @@ int heartbeat(gpointer data) {
         gtk_label_set_text(lbl_date, temp);
         sub_reset--;
         if (!sub_reset) {
-            select_small_encoder(se_af);
+            select_sub_encoder(se_af);
             sub_reset = SUB_RESET;
         }
     }
@@ -140,36 +112,26 @@ void init_display(int argc, char **argv) {
     lbl_vfo = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfo"));
     lbl_span = GTK_LABEL(gtk_builder_get_object(builder, "lbl_span"));
     lbl_rit = GTK_LABEL(gtk_builder_get_object(builder, "lbl_rit"));
-    lbl_vfob_frequency = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfob_frequency"));
-    lbl_vfoa_frequency = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfoa_frequency"));
-    lbl_vfob_mode = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfob_mode"));
-    lbl_vfoa_mode = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfoa_mode"));
+    GtkLabel *lbl_vfob_frequency = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfob_frequency"));
+    GtkLabel *lbl_vfoa_frequency = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfoa_frequency"));
+    GtkLabel *lbl_vfob_mode = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfob_mode"));
+    GtkLabel *lbl_vfoa_mode = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfoa_mode"));
     lbl_date = GTK_LABEL(gtk_builder_get_object(builder, "lbl_date"));
     lbl_record = GTK_LABEL(gtk_builder_get_object(builder, "lbl_record"));
     lbl_split = GTK_LABEL(gtk_builder_get_object(builder, "lbl_split"));
 
-    lbl_power = GTK_LABEL(gtk_builder_get_object(builder, "lbl_power"));
-    lbl_mic = GTK_LABEL(gtk_builder_get_object(builder, "lbl_mic"));
-    lbl_comp = GTK_LABEL(gtk_builder_get_object(builder, "lbl_comp"));
-    lbl_wpm = GTK_LABEL(gtk_builder_get_object(builder, "lbl_wpm"));
-    lbl_pitch = GTK_LABEL(gtk_builder_get_object(builder, "lbl_pitch"));
+    GtkLabel *lbl_power = GTK_LABEL(gtk_builder_get_object(builder, "lbl_power"));
+    GtkLabel *lbl_mic = GTK_LABEL(gtk_builder_get_object(builder, "lbl_mic"));
+    GtkLabel *lbl_comp = GTK_LABEL(gtk_builder_get_object(builder, "lbl_comp"));
+    GtkLabel *lbl_wpm = GTK_LABEL(gtk_builder_get_object(builder, "lbl_wpm"));
+    GtkLabel *lbl_pitch = GTK_LABEL(gtk_builder_get_object(builder, "lbl_pitch"));
     lbl_mode = GTK_LABEL(gtk_builder_get_object(builder, "lbl_mode"));
-    lbl_low = GTK_LABEL(gtk_builder_get_object(builder, "lbl_low"));
-    lbl_high = GTK_LABEL(gtk_builder_get_object(builder, "lbl_high"));
+    GtkLabel *lbl_low = GTK_LABEL(gtk_builder_get_object(builder, "lbl_low"));
+    GtkLabel *lbl_high = GTK_LABEL(gtk_builder_get_object(builder, "lbl_high"));
     lbl_agc = GTK_LABEL(gtk_builder_get_object(builder, "lbl_agc"));
-    lbl_if = GTK_LABEL(gtk_builder_get_object(builder, "lbl_if"));
-    lbl_af = GTK_LABEL(gtk_builder_get_object(builder, "lbl_af"));
+    GtkLabel *lbl_if = GTK_LABEL(gtk_builder_get_object(builder, "lbl_if"));
+    GtkLabel *lbl_af = GTK_LABEL(gtk_builder_get_object(builder, "lbl_af"));
     lbl_rx_tx = GTK_LABEL(gtk_builder_get_object(builder, "lbl_rx_tx"));
-
-    btn_high = GTK_BUTTON(gtk_builder_get_object(builder, "btn_high"));
-    btn_low = GTK_BUTTON(gtk_builder_get_object(builder, "btn_low"));
-    btn_af = GTK_BUTTON(gtk_builder_get_object(builder, "btn_af"));
-    btn_if = GTK_BUTTON(gtk_builder_get_object(builder, "btn_if"));
-    btn_pitch = GTK_BUTTON(gtk_builder_get_object(builder, "btn_pitch"));
-    btn_wpm = GTK_BUTTON(gtk_builder_get_object(builder, "btn_wpm"));
-    btn_comp = GTK_BUTTON(gtk_builder_get_object(builder, "btn_comp"));
-    btn_mic = GTK_BUTTON(gtk_builder_get_object(builder, "btn_mic"));
-    btn_power = GTK_BUTTON(gtk_builder_get_object(builder, "btn_power"));
 
     ent_command = GTK_ENTRY(gtk_builder_get_object(builder, "ent_command"));
 
@@ -177,16 +139,6 @@ void init_display(int argc, char **argv) {
 								GTK_STYLE_PROVIDER(css_provider),
 								GTK_STYLE_PROVIDER_PRIORITY_USER);
     
-    highlight[se_af] = gtk_widget_get_style_context(GTK_WIDGET(lbl_af));
-    highlight[se_comp] = gtk_widget_get_style_context(GTK_WIDGET(lbl_comp));
-    highlight[se_high] = gtk_widget_get_style_context(GTK_WIDGET(lbl_high));
-    highlight[se_if] = gtk_widget_get_style_context(GTK_WIDGET(lbl_if));
-    highlight[se_low] = gtk_widget_get_style_context(GTK_WIDGET(lbl_low));
-    highlight[se_mic] = gtk_widget_get_style_context(GTK_WIDGET(lbl_mic));
-    highlight[se_pitch] = gtk_widget_get_style_context(GTK_WIDGET(lbl_pitch));
-    highlight[se_power] = gtk_widget_get_style_context(GTK_WIDGET(lbl_power));
-    highlight[se_wpm] = gtk_widget_get_style_context(GTK_WIDGET(lbl_wpm));
-
     level[se_af] = lbl_af;
     level[se_comp] = lbl_comp;
     level[se_high] = lbl_high;
@@ -202,11 +154,6 @@ void init_display(int argc, char **argv) {
 
     vfo_mode[v_A] = lbl_vfoa_mode;
     vfo_mode[v_B] = lbl_vfob_mode;
-
-    vfo_state_context[v_A] = gtk_widget_get_style_context(GTK_WIDGET(lbl_vfoa_frequency));
-    vfo_state_context[v_B] = gtk_widget_get_style_context(GTK_WIDGET(lbl_vfob_frequency));
-
-    rx_tx_context = gtk_widget_get_style_context(GTK_WIDGET(lbl_rx_tx));
 
     init_gpio_pins();
     g_timeout_add(125, heartbeat, NULL);
@@ -243,16 +190,35 @@ void update_level(SubEncoder item, int value) {
 
 void update_rx_tx(bool rx_tx) {gtk_label_set_text(lbl_rx_tx, rx_txs[rx_tx]);}
 
-static void (* add_class[])(GtkStyleContext *, const gchar *) = {
-    gtk_style_context_remove_class,
-    gtk_style_context_add_class
-};
 
+// Handle CSS changes
 
 void enable_highlight(SubEncoder item, bool on) {
-    add_class[on](highlight[item], "highlight");
+    update_css(GTK_WIDGET(level[item]), on ? css_highlight : css_END);
 } 
 
+void update_vfo_state(Vfo vfo, VfoState state) {
+    const CSS_Code css_lu[] = {
+        css_inactive,
+        css_tx_inactive,
+        css_rx_inactive,
+        css_tx_active,
+        css_rx_active
+    };
+    update_css(GTK_WIDGET(vfo_frequency[vfo]), css_lu[state]);
+}
+
+void update_rx_tx_state(bool tx) {
+    update_css(GTK_WIDGET(lbl_rx_tx), tx ? css_tx_active : css_rx_active);
+}
+
+// end CSS changes
+
+
+static void call_select_sub_encoder(SubEncoder item) {
+    sub_reset = SUB_RESET;
+    select_sub_encoder(item);
+}
 
 void btn_quit_clicked_cb(GtkButton *b) {
 	gtk_main_quit();
@@ -268,56 +234,19 @@ void update_vfo_mode(Vfo vfo, Mode mode) {
     gtk_label_set_text(vfo_mode[vfo], modes[mode]);
 }
 
-const char *VFO_STATE[] = {
-    "vfo_inactive",
-    "vfo_tx_inactive",
-    "vfo_rx_inactive",
-    "vfo_tx_active",
-    "vfo_rx_active"
-};
-
-void update_vfo_state(Vfo vfo, VfoState new_vfoState) {
-    static VfoState saved_vfoState[] = {
-        vs_END,
-        vs_END
-    };
-    if (new_vfoState == saved_vfoState[vfo]) return;
-    if (saved_vfoState[vfo] != vs_END) {
-        add_class[false](vfo_state_context[vfo], VFO_STATE[saved_vfoState[vfo]]);
-    }
-    add_class[true](vfo_state_context[vfo], VFO_STATE[new_vfoState]);
-    saved_vfoState[vfo] = new_vfoState;
-}
-
-
 void btn_minimize_clicked_cb(GtkButton *b) {
     gtk_window_iconify(GTK_WINDOW(window));
 }
 
-static void call_select_small_encoder(SubEncoder item) {
-    sub_reset = SUB_RESET;
-    select_small_encoder(item);
-}
-
-void update_rx_tx_state(bool tx) {
-    static VfoState saved_rx_tx_state = vs_END;
-    VfoState new_rx_tx_state = tx ? vs_tx_active : vs_rx_active;
-    if (new_rx_tx_state == saved_rx_tx_state) return;
-    if (saved_rx_tx_state != vs_END) {
-        add_class[false](rx_tx_context, VFO_STATE[saved_rx_tx_state]);
-    }
-    add_class[true](rx_tx_context, VFO_STATE[new_rx_tx_state]);
-    saved_rx_tx_state = new_rx_tx_state;
-}
-void btn_high_clicked_cb(GtkButton *b) {call_select_small_encoder(se_high);}
-void btn_low_clicked_cb(GtkButton *b) {call_select_small_encoder(se_low);}
-void btn_af_clicked_cb(GtkButton *b) {call_select_small_encoder(se_af);}
-void btn_if_clicked_cb(GtkButton *b) {call_select_small_encoder(se_if);}
-void btn_pitch_clicked_cb(GtkButton *b) {call_select_small_encoder(se_pitch);}
-void btn_wpm_clicked_cb(GtkButton *b) {call_select_small_encoder(se_wpm);}
-void btn_comp_clicked_cb(GtkButton *b) {call_select_small_encoder(se_comp);}
-void btn_mic_clicked_cb(GtkButton *b) {call_select_small_encoder(se_mic);}
-void btn_power_clicked_cb(GtkButton *b) {call_select_small_encoder(se_power);}
+void btn_high_clicked_cb(GtkButton *b) {call_select_sub_encoder(se_high);}
+void btn_low_clicked_cb(GtkButton *b) {call_select_sub_encoder(se_low);}
+void btn_af_clicked_cb(GtkButton *b) {call_select_sub_encoder(se_af);}
+void btn_if_clicked_cb(GtkButton *b) {call_select_sub_encoder(se_if);}
+void btn_pitch_clicked_cb(GtkButton *b) {call_select_sub_encoder(se_pitch);}
+void btn_wpm_clicked_cb(GtkButton *b) {call_select_sub_encoder(se_wpm);}
+void btn_comp_clicked_cb(GtkButton *b) {call_select_sub_encoder(se_comp);}
+void btn_mic_clicked_cb(GtkButton *b) {call_select_sub_encoder(se_mic);}
+void btn_power_clicked_cb(GtkButton *b) {call_select_sub_encoder(se_power);}
 
 void btn_10m_clicked_cb(GtkButton *b) {do_band(b_10m);}
 void btn_12m_clicked_cb(GtkButton *b) {do_band(b_12m);}
