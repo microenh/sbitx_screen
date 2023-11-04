@@ -1,52 +1,8 @@
-#include <stdbool.h>
 #include <stdio.h>
 #include "radio.h"
 #include "display.h"
-#include "settings.h"
-#include "display.h"
-
-#define BAND_STACK_SIZE 4
-
-typedef struct _vfoData {
-    Agc agc;
-    Mode mode;
-    int frequency;
-    int level[se_END];
-} VfoData;
-
-typedef struct _miscSettings {
-    bool rit;
-    int rit_value;
-    bool split;
-    bool record;
-    Span span;
-    Step step;
-} MiscSettings;
-
-typedef struct _bandStackEntry {
-    bool valid;
-    VfoData vfoData[v_END];
-    MiscSettings miscSettings;
-} BandStackEntry;
-
-typedef struct _bandStack {
-    int current;
-    BandStackEntry bandStackEntry[BAND_STACK_SIZE];
-} BandStack;
-
-typedef struct _radio {
-    Vfo vfo;
-    SubEncoder subEncoder;
-    VfoData vfoData[v_END];
-    MiscSettings miscSettings;
-    bool tx;
-    BandStack bandStack[b_END];   
-} Radio;
 
 static Radio radio;
-
-static void update_vfo_states(void);
-
 
 static Band get_band(void) {
     int f = radio.vfoData[radio.vfo].frequency;
@@ -69,97 +25,6 @@ static Band get_band(void) {
     return b_END;
 }
 
-static void update_display(void) {
-    update_agc(radio.vfoData[radio.vfo].agc);
-    update_mode(radio.vfoData[radio.vfo].mode);
-    update_span(radio.miscSettings.span);
-    update_vfo(radio.vfo);
-    update_step(radio.miscSettings.step);
-    update_rit(radio.miscSettings.rit);
-    update_split(radio.miscSettings.split);
-    update_record(radio.miscSettings.record);
-    update_tx(radio.tx);
-    update_level_highlight(radio.subEncoder, true);
-    for (int i=0; i<se_END; i++) {
-        update_level(i, radio.vfoData[radio.vfo].level[i]);
-    }
-    for (int i=0; i<v_END; i++) {
-        update_vfo_frequency(i, radio.vfoData[i].frequency);
-        update_vfo_mode(i, radio.vfoData[i].mode);
-    }
-    update_vfo_states();
-}
-
-void do_band(Band band) {
-    // Band cur_band = get_band();
-    // if (cur_band != b_END) {
-    //     // save current settings
-    //     int tos = (radio.bandStack[cur_band].current - 1) % BAND_STACK_SIZE;
-    //     radio.bandStack[cur_band].current = tos;
-    //     BandStackEntry bse = {
-    //         .valid = true,
-    //         .frequency = radio.frequency[radio.vfo],
-    //         .mode = radio.mode[radio.vfo],
-    //         .low = radio.level[se_low],
-    //         .high = radio.level[se_high],
-    //         .if_setting = radio.level[se_if],
-    //         .agc = radio.agc,
-    //         .pitch = radio.level[se_pitch],
-    //         .mic = radio.level[se_mic],
-    //         .comp = radio.level[se_comp],
-    //         .power = radio.level[se_power],
-    //         .step = radio.step,
-    //         .span = radio.span,
-    //     };
-    //     radio.bandStack[cur_band].bandStackEntry[tos] = bse;        
-    // }
-    // BandStackEntry bse = radio.bandStack[band].bandStackEntry[radio.bandStack[band].current];
-    // if (bse.valid) {
-    //     radio.agc = bse.agc;
-    //     for (int i=0; i<v_END; i++) {
-    //         radio.mode[i] = bse.mode;
-    //         radio.frequency[i] = bse.frequency;
-    //     }
-    //     radio.span = bse.span;
-    //     radio.step = bse.step;
-    //     radio.rit = false;
-    //     radio.rit_value = 0;
-    //     radio.split = false;
-    //     radio.record = false;
-    //     radio.tx = false;
-    //     radio.subEncoder = se_af;
-    //     radio.level[se_comp] = bse.comp;
-    //     radio.level[se_high] = bse.high;
-    //     radio.level[se_if] = bse.if_setting;
-    //     radio.level[se_low] = bse.low;
-    //     radio.level[se_mic] = bse.mic;
-    //     radio.level[se_pitch] = bse.pitch;
-    //     radio.level[se_power] = bse.power;
-    //     update_display();
-    // }
-}
-
-
-
-//                                    af, comp, high,  if,  low, mic, pitch, power, wpm
-static const int subEncoderMin[]  = {  0,    0,    0,   0,    0,   0,   300,     0,   5};
-static const int subEncoderInit[] = { 50,    0, 3000,  50,  200,  50,   600,     0,  13};
-static const int subEncoderMax[]  = {100,  100, 4000, 100, 1000, 100,  1500,   100,  40};
-static const int subEncoderStep[] = {  1,    1,   50,   1,   50,   1,    10,     1,   1};
-
-
-void init_radio(void) {
-    for (int i=0; i<v_END; i++) {
-        for (int j=0; j<se_END; j++) {
-            radio.vfoData[i].level[j] = subEncoderInit[j];
-        }
-        radio.vfoData[i].frequency = 7000000;
-        radio.vfoData[i].mode = m_lsb;
-    }
-
-    update_display();
-}
-
 static void update_vfo_states(void) {
     Vfo sel, unsel;
     VfoState selState, unselState;
@@ -175,6 +40,66 @@ static void update_vfo_states(void) {
     }
     update_vfo_state(sel, selState);
     update_vfo_state(unsel, unselState);
+}
+
+static void update_display(void) {
+    update_agc(radio.vfoData[radio.vfo].agc);
+    update_mode(radio.vfoData[radio.vfo].mode);
+    update_span(radio.miscSettings.span);
+    update_vfo(radio.vfo);
+    update_step(radio.miscSettings.step);
+    update_rit(radio.miscSettings.rit);
+    update_split(radio.miscSettings.split);
+    update_record(radio.record);
+    update_tx(radio.tx);
+    for (int i=0; i<se_END; i++) {
+        update_level(i, radio.vfoData[radio.vfo].level[i]);
+        update_level_highlight(i, i==radio.subEncoder);
+    }
+    for (int i=0; i<v_END; i++) {
+        update_vfo_frequency(i, radio.vfoData[i].frequency);
+        update_vfo_mode(i, radio.vfoData[i].mode);
+    }
+    update_vfo_states();
+}
+
+void do_band(Band band) {
+    if (radio.tx) return;
+    // Band cur_band = get_band();
+    // if (cur_band == b_END) {
+    //     // current not in a band, don't save state, go to tos of selected band
+    // } else if (cur_band == band) {
+    //     // same band, go to next band stack entry
+    // } else {
+    //     // save state to band stack, go to tos of selected band
+    // }
+
+    int sr = radio.bandStack[band].current;
+    for (int i=0; i<v_END; i++) {
+        radio.vfoData[i] = radio.bandStack[band].bandStackEntry[sr].vfoData[i];
+    }
+    radio.miscSettings = radio.bandStack[band].bandStackEntry[sr].miscSettings;
+    radio.vfo = v_A;
+    radio.subEncoder = se_af;
+    radio.tx = false;
+    radio.record = false;
+    sr++;
+    if (sr >= BAND_STACK_SIZE)
+        sr = 0;
+    radio.bandStack[band].current = sr;
+
+    update_display();
+}
+
+//                                    af, comp, high,  if,  low, mic, pitch, power, wpm
+static const int subEncoderMin[]  = {  0,    0,    0,   0,    0,   0,   300,     0,   5};
+static const int subEncoderInit[] = { 50,    0, 3000,  50,  200,  50,   600,     0,  13};
+static const int subEncoderMax[]  = {100,  100, 4000, 100, 1000, 100,  1500,   100,  40};
+static const int subEncoderStep[] = {  1,    1,   50,   1,   50,   1,    10,     1,   1};
+
+void init_radio(void) {
+    initial_radio_settings(&radio);    
+    update_display();
 }
 
 void do_agc(void) {
@@ -223,7 +148,6 @@ void do_step(void) {
     step++;
     if (step >= s_END)
         step = 0;
-
     radio.miscSettings.step = step;
     update_step(step);
     int adj = radio.vfoData[radio.vfo].frequency % step_values[step];
@@ -259,8 +183,8 @@ void do_split(void) {
 }
 
 void do_record(void) {
-    radio.miscSettings.record = !radio.miscSettings.record;
-    update_record(radio.miscSettings.record);
+    radio.record = !radio.record;
+    update_record(radio.record);
 }
 
 void do_tx(void) {
@@ -268,7 +192,6 @@ void do_tx(void) {
     update_tx(radio.tx);
     update_vfo_states();
 }
-
 
 void select_sub_encoder(SubEncoder item) {
     if (item != radio.subEncoder) {
@@ -300,7 +223,6 @@ void do_sub_encoder(int change) {
     }
 }
 
-
 void do_main_encoder(int change) {
     if (radio.tx) return;
     const int FREQ_MIN = 1000;
@@ -317,7 +239,6 @@ void do_main_encoder(int change) {
         else if (rit > RIT_MAX)
             rit = RIT_MAX;
         radio.miscSettings.rit_value = rit;
-
     } else {
         int frequency = radio.vfoData[radio.vfo].frequency + step_values[radio.miscSettings.step] * change;
         if (frequency < FREQ_MIN)
@@ -333,5 +254,4 @@ void do_main_encoder(int change) {
                 update_vfo_frequency(i, new_frequency);
         }
     }
-
 }

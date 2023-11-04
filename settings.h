@@ -25,6 +25,8 @@ typedef enum _mode {
     m_usb,
     m_cwr,
     m_cw,
+    m_data,
+    m_datar,
     m_END
 } Mode;
 
@@ -65,13 +67,13 @@ typedef enum _vfoState {
 } VfoState;
 
 typedef enum _band {
-    b_10m,
-    b_12m,
-    b_15m,
-    b_17m,
-    b_20m,
-    b_30m,
-    b_40m,
     b_80m,
+    b_40m,
+    b_30m,
+    b_20m,
+    b_17m,
+    b_15m,
+    b_12m,
+    b_10m,
     b_END
 } Band;

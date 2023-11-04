@@ -30,8 +30,10 @@ const char *spans[] = {
 const char *modes[] = {
     "LSB",
     "USB",
-    "CWR",
-    "CW"
+    "CW-R",
+    "CW",
+    "DT",
+    "DT-R"
 };
 
 const char *agcs[] = {
