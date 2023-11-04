@@ -22,9 +22,8 @@ void update_vfo_mode(Vfo vfo, Mode mode);
 void update_split(bool on);
 void update_record(bool on);
 void update_rit(bool on);
-void update_rx_tx(bool rx_tx);
+void update_tx(bool tx);
 
 // change colors
-void update_rx_tx_state(bool tx);
 void update_vfo_state(Vfo vfo, VfoState vfoState);
 void update_level_highlight(SubEncoder item, bool on); 

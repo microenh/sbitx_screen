@@ -9,7 +9,7 @@ void select_sub_encoder(SubEncoder item);
 void do_agc(void);
 void do_mode(void);
 void do_record(void);
-void do_rx_tx(void);
+void do_tx(void);
 void do_rit(void);
 void do_span(void);
 void do_vfo(void);
