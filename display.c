@@ -57,6 +57,7 @@ static GtkLabel
     *vfo_mode[v_END];
 
 static GtkEntry* ent_command;
+static GtkDrawingArea* dwg_panafall;
 
 
 #define SUB_RESET 10
@@ -146,6 +147,8 @@ void init_display(int argc, char **argv) {
     vfo_mode[v_A] = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfoa_mode"));
     vfo_mode[v_B] = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfob_mode"));
 
+    dwg_panafall = GTK_DRAWING_AREA(gtk_builder_get_object(builder, "dwg_panafall"));
+
     init_gpio_pins();
     g_timeout_add(125, heartbeat, NULL);
 
@@ -154,6 +157,10 @@ void init_display(int argc, char **argv) {
 
 	gtk_widget_show(window);
 	gtk_window_fullscreen(GTK_WINDOW(window));
+
+    char temp[20];
+    sprintf(temp, "dwg width: %d", gtk_widget_get_allocated_width(GTK_WIDGET(dwg_panafall)));
+    gtk_label_set_text(lbl_console, temp);
 }
 
 

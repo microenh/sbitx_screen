@@ -4,6 +4,8 @@
 
 static Radio radio;
 
+static int adj;
+
 static Band get_band(void) {
     int f = radio.vfoData[radio.vfo].frequency;
     if      (f >=  3500000 && f <=  4000000)
@@ -68,19 +70,17 @@ void do_band(Band band) {
     Band cur_band = get_band();
     // same band: swap and increment tos
     if (cur_band == band) {
-        int sr = radio.bandStack[cur_band].current;
+        int tos = radio.bandStack[cur_band].current;
+        int bos = tos+1;
+        if (bos >= BAND_STACK_SIZE)
+            bos = 0;
         for (int i=0; i<v_END; i++) {
-            VfoData temp_vfoData = radio.vfoData[i];
-            radio.vfoData[i] = radio.bandStack[band].bandStackEntry[sr].vfoData[i];
-            radio.bandStack[band].bandStackEntry[sr].vfoData[i] = temp_vfoData;
+            radio.bandStack[band].bandStackEntry[bos].vfoData[i] = radio.vfoData[i];
+            radio.vfoData[i] = radio.bandStack[band].bandStackEntry[tos].vfoData[i];
         }
-        MiscSettings temp_miscSettings = radio.miscSettings;
-        radio.miscSettings = radio.bandStack[band].bandStackEntry[sr].miscSettings;
-        radio.bandStack[band].bandStackEntry[sr].miscSettings = temp_miscSettings;
-        sr++;
-        if (sr >= BAND_STACK_SIZE)
-            sr = 0;
-        radio.bandStack[band].current = sr;           
+        radio.bandStack[band].bandStackEntry[bos].miscSettings = radio.miscSettings;
+        radio.miscSettings = radio.bandStack[band].bandStackEntry[tos].miscSettings;
+        radio.bandStack[band].current = bos;           
     } else {
         if (cur_band != b_END) {
             // save to current tos
@@ -164,11 +164,7 @@ void do_step(void) {
         step = 0;
     radio.miscSettings.step = step;
     update_step(step);
-    int adj = radio.vfoData[radio.vfo].frequency % step_values[step];
-    if (adj) {
-        radio.vfoData[radio.vfo].frequency -= adj;
-        update_vfo_frequency(radio.vfo, radio.vfoData[radio.vfo].frequency);
-    }
+    adj = radio.vfoData[radio.vfo].frequency % step_values[step];
 }
 
 static int adj_frequency(Vfo vfo){
@@ -243,9 +239,6 @@ void do_main_encoder(int change) {
     const int FREQ_MAX = 30000000;
     const int RIT_MIN = -10000;
     const int RIT_MAX = 10000;
-    int old_frequency[v_END];
-    for (int i=0; i<v_END; i++)
-        old_frequency[i] = adj_frequency(i);
     if (radio.miscSettings.rit) {
         int rit = radio.miscSettings.rit_value + 10 * change;
         if (rit < RIT_MIN)
@@ -254,7 +247,8 @@ void do_main_encoder(int change) {
             rit = RIT_MAX;
         radio.miscSettings.rit_value = rit;
     } else {
-        int frequency = radio.vfoData[radio.vfo].frequency + step_values[radio.miscSettings.step] * change;
+        int frequency = radio.vfoData[radio.vfo].frequency - adj + step_values[radio.miscSettings.step] * change;
+        adj = 0;
         if (frequency < FREQ_MIN)
             frequency = FREQ_MIN;
         else if (frequency > FREQ_MAX)
@@ -263,9 +257,7 @@ void do_main_encoder(int change) {
     }
     for (int i=0; i<v_END; i++) {
         if (!radio.miscSettings.split || i == radio.vfo) {
-            int new_frequency = adj_frequency(i);
-            if (new_frequency != old_frequency[i])
-                update_vfo_frequency(i, new_frequency);
+            update_vfo_frequency(i, adj_frequency(i));
         }
     }
 }

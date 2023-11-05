@@ -62,7 +62,7 @@ void initial_radio_settings(Radio *radio) {
         }       
     }
 
-    const int sr=1;
+    const int sr=0;
     const int bd=b_80m;
     for (int i=0; i<v_END; i++) {
         radio->vfoData[i] = radio->bandStack[bd].bandStackEntry[sr].vfoData[i];
