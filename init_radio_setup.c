@@ -1,4 +1,4 @@
-#include "radio.h"
+#include "radio_state.h"
 
 void initial_radio_settings(Radio *radio) {
     int level[3][se_END];

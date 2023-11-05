@@ -38,7 +38,7 @@
 
 #include "display.h"
 #include "settings.h"
-#include "radio.h"
+#include "radio_state.h"
 
 
 int main(int argc, char *argv[]) {

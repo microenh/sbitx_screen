@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "radio.h"
+#include "radio_state.h"
 #include "display.h"
 
 static Radio radio;
@@ -65,31 +65,45 @@ static void update_display(void) {
 
 void do_band(Band band) {
     if (radio.tx) return;
-    // Band cur_band = get_band();
-    // if (cur_band == b_END) {
-    //     // current not in a band, don't save state, go to tos of selected band
-    // } else if (cur_band == band) {
-    //     // same band, go to next band stack entry
-    // } else {
-    //     // save state to band stack, go to tos of selected band
-    // }
-
-    int sr = radio.bandStack[band].current;
-    for (int i=0; i<v_END; i++) {
-        radio.vfoData[i] = radio.bandStack[band].bandStackEntry[sr].vfoData[i];
-    }
-    radio.miscSettings = radio.bandStack[band].bandStackEntry[sr].miscSettings;
-    radio.vfo = v_A;
+    Band cur_band = get_band();
+    // same band: swap and increment tos
+    if (cur_band == band) {
+        int sr = radio.bandStack[cur_band].current;
+        for (int i=0; i<v_END; i++) {
+            VfoData temp_vfoData = radio.vfoData[i];
+            radio.vfoData[i] = radio.bandStack[band].bandStackEntry[sr].vfoData[i];
+            radio.bandStack[band].bandStackEntry[sr].vfoData[i] = temp_vfoData;
+        }
+        MiscSettings temp_miscSettings = radio.miscSettings;
+        radio.miscSettings = radio.bandStack[band].bandStackEntry[sr].miscSettings;
+        radio.bandStack[band].bandStackEntry[sr].miscSettings = temp_miscSettings;
+        sr++;
+        if (sr >= BAND_STACK_SIZE)
+            sr = 0;
+        radio.bandStack[band].current = sr;           
+    } else {
+        if (cur_band != b_END) {
+            // save to current tos
+            int sr = radio.bandStack[cur_band].current;
+            for (int i=0; i<v_END; i++)
+                radio.bandStack[cur_band].bandStackEntry[sr].vfoData[i] = radio.vfoData[i];
+            radio.bandStack[cur_band].bandStackEntry[sr].miscSettings = radio.miscSettings;
+        }
+        int sr = radio.bandStack[cur_band].current;
+        for (int i=0; i<v_END; i++)
+            radio.vfoData[i] = radio.bandStack[band].bandStackEntry[sr].vfoData[i];
+        radio.miscSettings = radio.bandStack[band].bandStackEntry[sr].miscSettings;
+        sr++;
+        if (sr >= BAND_STACK_SIZE)
+            sr = 0;
+        radio.bandStack[band].current = sr;
+    }           
     radio.subEncoder = se_af;
     radio.tx = false;
     radio.record = false;
-    sr++;
-    if (sr >= BAND_STACK_SIZE)
-        sr = 0;
-    radio.bandStack[band].current = sr;
-
     update_display();
 }
+
 
 //                                    af, comp, high,  if,  low, mic, pitch, power, wpm
 static const int subEncoderMin[]  = {  0,    0,    0,   0,    0,   0,   300,     0,   5};

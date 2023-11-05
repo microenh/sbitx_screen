@@ -5,7 +5,7 @@
 #include <time.h>
 
 #include "display.h"
-#include "radio.h"
+#include "radio_state.h"
 #include "settings.h"
 #include "rotary.h"
 #include "update_css.h"
