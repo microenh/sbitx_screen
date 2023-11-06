@@ -46,6 +46,7 @@ int main(int argc, char *argv[]) {
 	init_radio();
 
 	gtk_main();
+	save_settings();
 
 	return EXIT_SUCCESS;
 }

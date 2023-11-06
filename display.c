@@ -22,8 +22,7 @@ typedef enum _offOn {
 static void open_glade_and_css(GtkBuilder **builder, GtkCssProvider **css_provider) {
 	// look for glade and css files in either the current directory or the one above it
 	// i.e. if the file is in a build folder off the main directory
-	char temp[4096];
-	char prefix[6];
+	char temp[25];
 	FILE *f = fopen(GLADE, "r");
 	if (f) {
 		fclose(f);
@@ -284,7 +283,6 @@ void update_tx(bool tx) {
     }
 }
 
-
 void update_vfo_frequency(Vfo vfo, int frequency) {
     static int saved[v_END] = {
         -1, -1
@@ -292,7 +290,7 @@ void update_vfo_frequency(Vfo vfo, int frequency) {
     if (frequency != saved[vfo]) {
         char temp[20];
         saved[vfo] = frequency;
-        sprintf(temp, "%2d.%03d.%03d", frequency / 1000000, (frequency / 1000) % 1000, frequency % 1000);
+        sprintf(temp, "%2d.%03d.%02d", frequency / 1000000, (frequency / 1000) % 1000, (frequency % 1000) / 10);
         gtk_label_set_text(vfo_frequency[vfo], temp);
     }
 }

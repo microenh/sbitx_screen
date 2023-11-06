@@ -6,6 +6,10 @@ static Radio radio;
 
 static int adj;
 
+#define SETTINGS "settings.dat"
+
+char prefix[6];
+
 static Band get_band(void) {
     int f = radio.vfoData[radio.vfo].frequency;
     if      (f >=  3500000 && f <=  4000000)
@@ -71,16 +75,19 @@ void do_band(Band band) {
     // same band: swap and increment tos
     if (cur_band == band) {
         int tos = radio.bandStack[cur_band].current;
-        int bos = tos+1;
-        if (bos >= BAND_STACK_SIZE)
-            bos = 0;
         for (int i=0; i<v_END; i++) {
-            radio.bandStack[band].bandStackEntry[bos].vfoData[i] = radio.vfoData[i];
-            radio.vfoData[i] = radio.bandStack[band].bandStackEntry[tos].vfoData[i];
+            VfoData temp_vfoData;
+            temp_vfoData = radio.bandStack[band].bandStackEntry[tos].vfoData[i];
+            radio.bandStack[band].bandStackEntry[tos].vfoData[i] = radio.vfoData[i];
+            radio.vfoData[i] = temp_vfoData;
         }
-        radio.bandStack[band].bandStackEntry[bos].miscSettings = radio.miscSettings;
-        radio.miscSettings = radio.bandStack[band].bandStackEntry[tos].miscSettings;
-        radio.bandStack[band].current = bos;           
+        MiscSettings temp_miscSettings = radio.bandStack[band].bandStackEntry[tos].miscSettings;
+        radio.bandStack[band].bandStackEntry[tos].miscSettings = radio.miscSettings;
+        radio.miscSettings = temp_miscSettings;
+        tos++;
+        if (tos >= BAND_STACK_SIZE)
+            tos = 0;
+        radio.bandStack[band].current = tos;           
     } else {
         if (cur_band != b_END) {
             // save to current tos
@@ -104,6 +111,27 @@ void do_band(Band band) {
     update_display();
 }
 
+static void load_settings(void) {
+    char temp[25];
+    sprintf(temp, prefix, SETTINGS);
+    FILE *f = fopen(temp, "r");
+    if (f) {
+        fread(&radio, sizeof(radio), 1, f);
+        fclose(f);
+    } else {
+        initial_radio_settings(&radio);
+    }
+
+}
+
+void save_settings(void) {
+    char temp[25];
+    sprintf(temp, prefix, SETTINGS);
+    FILE *f = fopen(temp, "w");
+    fwrite(&radio, sizeof(radio), 1, f);
+    fclose(f);
+}
+
 
 //                                    af, comp, high,  if,  low, mic, pitch, power, wpm
 static const int subEncoderMin[]  = {  0,    0,    0,   0,    0,   0,   300,     0,   5};
@@ -112,7 +140,7 @@ static const int subEncoderMax[]  = {100,  100, 4000, 100, 1000, 100,  1500,   1
 static const int subEncoderStep[] = {  1,    1,   50,   1,   50,   1,    10,     1,   1};
 
 void init_radio(void) {
-    initial_radio_settings(&radio);    
+    load_settings();    
     update_display();
 }
 

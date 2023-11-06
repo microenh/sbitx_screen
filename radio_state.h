@@ -58,3 +58,7 @@ void do_band(Band band);
 
 void do_sub_encoder(int change);
 void do_main_encoder(int change);
+
+extern char prefix[];
+
+void save_settings(void);

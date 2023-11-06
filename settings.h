@@ -1,12 +1,12 @@
 #pragma once
 
 typedef enum _step {
-    s_10Hz,
-    s_100Hz,
-    s_1kHz,
-    s_10kHz,
-    s_100kHz,
     s_1MHz,
+    s_100kHz,
+    s_10kHz,
+    s_1kHz,
+    s_100Hz,
+    s_10Hz,
     s_END
 } Step;
 

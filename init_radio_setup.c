@@ -45,6 +45,7 @@ void initial_radio_settings(Radio *radio) {
     Step steps[3] = {s_10Hz, s_100Hz, s_10Hz};
 
     for (int b=0; b<b_END; b++) {
+        radio->bandStack->current = 0;
         if (b == b_30m)
             modes[1] = m_cw;
         else if (b == b_20m)

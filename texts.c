@@ -1,21 +1,21 @@
 #include "texts.h"
 
 const char *steps[] = {
-    "10H",
-    "100H",
-    "1K",
-    "10K",
+    "1M",
     "100K",
-    "1M"
+    "10K",
+    "1K",
+    "100",
+    "10"
 };
 
 const int step_values[] = {
-    10,
-    100,
-    1000,
-    10000,
+    1000000,
     100000,
-    1000000
+    10000,
+    1000,
+    100,
+    10
 };
 
 const char *spans[] = {
@@ -57,3 +57,4 @@ const char *rx_txs[] = {
     "RX",
     "TX"
 };
+
