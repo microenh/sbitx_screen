@@ -41,7 +41,6 @@ static GtkWidget *window;
 
 static GtkLabel
     *lbl_agc,
-    *lbl_console,
     *lbl_date,
     *lbl_mode,
     *lbl_record,
@@ -56,6 +55,8 @@ static GtkLabel
     *vfo_mode[v_END];
 
 static GtkEntry* ent_command;
+// static GtkTextView* txv_console;
+static GtkTextBuffer *tb_console;
 static GtkDrawingArea* dwg_panafall;
 
 
@@ -117,7 +118,6 @@ void init_display(int argc, char **argv) {
  	window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
 
     lbl_agc = GTK_LABEL(gtk_builder_get_object(builder, "lbl_agc"));
-    lbl_console = GTK_LABEL(gtk_builder_get_object(builder, "lbl_console"));
     lbl_date = GTK_LABEL(gtk_builder_get_object(builder, "lbl_date"));
     lbl_mode = GTK_LABEL(gtk_builder_get_object(builder, "lbl_mode"));
     lbl_record = GTK_LABEL(gtk_builder_get_object(builder, "lbl_record"));
@@ -129,7 +129,9 @@ void init_display(int argc, char **argv) {
     lbl_vfo = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfo"));
 
     ent_command = GTK_ENTRY(gtk_builder_get_object(builder, "ent_command"));
-
+    GtkTextView *txv_console = GTK_TEXT_VIEW(gtk_builder_get_object(builder, "txv_console"));
+    tb_console = gtk_text_view_get_buffer(txv_console);
+ 
     level[se_af] = GTK_LABEL(gtk_builder_get_object(builder, "lbl_af"));
     level[se_comp] = GTK_LABEL(gtk_builder_get_object(builder, "lbl_comp"));
     level[se_high] = GTK_LABEL(gtk_builder_get_object(builder, "lbl_high"));
@@ -159,11 +161,24 @@ void init_display(int argc, char **argv) {
 
     char temp[20];
     sprintf(temp, "dwg width: %d", gtk_widget_get_allocated_width(GTK_WIDGET(dwg_panafall)));
-    gtk_label_set_text(lbl_console, temp);
+    update_console(temp);
 }
 
 
-void update_console(char *text) {gtk_label_set_text(lbl_console, text);}
+void update_console(char *text) {
+    GtkTextIter iter;
+    gtk_text_buffer_get_end_iter(tb_console, &iter);
+    gtk_text_buffer_insert(tb_console, &iter, text, -1);
+    gtk_text_buffer_insert(tb_console, &iter, "\r\n", 1);
+    if (gtk_text_buffer_get_line_count(tb_console) > 21) {
+        GtkTextIter iter1;
+        gtk_text_buffer_get_start_iter(tb_console, &iter);
+        gtk_text_buffer_get_iter_at_line(tb_console, &iter1, 1);
+        gtk_text_buffer_delete(tb_console, &iter, &iter1);
+    } 
+}
+
+
 void update_date(char *text) {gtk_label_set_text(lbl_date, text);}
 
 void update_step(Step step) {

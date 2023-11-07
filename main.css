@@ -6,6 +6,11 @@
     background: black;
 }
 
+.main text {
+    color: white;
+    background: black;
+}
+
 .main button {
     font-size: 12px;
     font-weight: bold;
