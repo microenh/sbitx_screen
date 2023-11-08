@@ -1,12 +1,17 @@
 #pragma once
 
 #include <stdbool.h>
+#include <gtk/gtk.h>
+#include <gtk/gtkx.h>
+
 #include "texts.h"
 #include "settings.h"
 
+extern GtkEntry *ent_command;
+extern GtkTextBuffer *tb_console;
+
 void init_display(int argc, char **argv);
 
-void update_console(char *text);
 void update_date(char *text);
 void update_level(SubEncoder item, int value);
 

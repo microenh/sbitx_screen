@@ -58,6 +58,7 @@ void do_band(Band band);
 
 void do_sub_encoder(int change);
 void do_main_encoder(int change);
+void do_frequency(int frequency);
 
 extern char prefix[];
 

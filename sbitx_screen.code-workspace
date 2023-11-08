@@ -10,7 +10,9 @@
 		},
 		"files.associations": {
 			"libgen.h": "c",
-			"stdbool.h": "c"
+			"stdbool.h": "c",
+			"string.h": "c",
+			"gmodule.h": "c"
 		},
 		"cmake.generator": "Ninja"
 	}

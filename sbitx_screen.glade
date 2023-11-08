@@ -51,7 +51,9 @@
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="hexpand">True</property>
+                <property name="max-length">28</property>
                 <property name="placeholder-text" translatable="yes">enter command</property>
+                <signal name="activate" handler="ent_command_activate_cb" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>

@@ -261,12 +261,27 @@ void do_sub_encoder(int change) {
     }
 }
 
+const int FREQ_MIN = 1000;
+const int FREQ_MAX = 30000000;
+const int RIT_MIN = -10000;
+const int RIT_MAX = 10000;
+
+
+void do_frequency(int frequency) {
+    if (radio.tx) return;
+    radio.miscSettings.rit = false;
+    radio.miscSettings.rit_value = 0;
+    if (frequency < FREQ_MIN)
+        frequency = FREQ_MIN;
+    else if (frequency > FREQ_MAX)
+        frequency = FREQ_MAX;
+    radio.vfoData[radio.vfo].frequency = frequency;
+    update_vfo_frequency(radio.vfo, frequency);
+    update_rit(radio.miscSettings.rit);
+}
+
 void do_main_encoder(int change) {
     if (radio.tx) return;
-    const int FREQ_MIN = 1000;
-    const int FREQ_MAX = 30000000;
-    const int RIT_MIN = -10000;
-    const int RIT_MAX = 10000;
     if (radio.miscSettings.rit) {
         int rit = radio.miscSettings.rit_value + 10 * change;
         if (rit < RIT_MIN)
