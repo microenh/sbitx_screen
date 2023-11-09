@@ -145,7 +145,7 @@ void init_radio(void) {
     update_display();
 }
 
-void do_agc(void) {
+void do_agc_inc(void) {
     if (radio.tx) return;
     Agc agc = radio.vfoData[radio.vfo].agc;
     agc++;
@@ -153,6 +153,12 @@ void do_agc(void) {
         agc = 0;
     radio.vfoData[radio.vfo].agc = agc;    
     update_agc(agc);
+}
+
+void do_mode(Mode m) {
+    radio.vfoData[radio.vfo].mode = m;
+    update_mode(m);
+    update_vfo_mode(radio.vfo, m);
 }
 
 void do_mode_inc(void) {
@@ -164,40 +170,48 @@ void do_mode_inc(void) {
     do_mode(mode);
 }
 
-void do_mode(Mode m) {
-    radio.vfoData[radio.vfo].mode = m;
-    update_mode(m);
-    update_vfo_mode(radio.vfo, m);
+void do_span(Span s) {
+    if (radio.tx) return;
+    radio.miscSettings.span = s;
+    update_span(s);
 }
 
-void do_span(void) {
-    if (radio.tx) return;
+void do_span_inc(void) {
     Span span = radio.miscSettings.span;
     span++;
     if (span >= sp_END)
         span = 0;
-    radio.miscSettings.span = span;
-    update_span(span);
+    do_span(span);
 }
 
-void do_vfo(void) {
+void do_vfo(Vfo v) {
     if (radio.tx) return;
-    radio.vfo++;
-    if (radio.vfo >= v_END)
-        radio.vfo = 0;
+    radio.vfo = v;    
     update_vfo(radio.vfo);
     update_vfo_states();
 }
 
-void do_step(void) {
+void do_vfo_inc(void) {
+    Vfo vfo = radio.vfo;
+    vfo++;
+    if (vfo >= v_END)
+        vfo = 0;
+    do_vfo(vfo);
+}
+
+void do_step(Step step) {
+    radio.miscSettings.step = step;
+    update_step(step);
+    adj = radio.vfoData[radio.vfo].frequency % step_values[step];
+}
+
+void do_step_inc(void) {
     if (radio.tx) return;
     Step step = radio.miscSettings.step;
     step++;
     if (step >= s_END)
         step = 0;
-    radio.miscSettings.step = step;
-    update_step(step);
-    adj = radio.vfoData[radio.vfo].frequency % step_values[step];
+    do_step(step);
 }
 
 static int adj_frequency(Vfo vfo){
@@ -207,7 +221,7 @@ static int adj_frequency(Vfo vfo){
     return frequency;
 }
 
-void do_rit(void) {
+void do_rit_inc(void) {
     if (radio.tx) return;
     radio.miscSettings.rit = !radio.miscSettings.rit;
     update_rit(radio.miscSettings.rit);
@@ -218,19 +232,19 @@ void do_rit(void) {
     }
 }
 
-void do_split(void) {
+void do_split_inc(void) {
     if (radio.tx) return;
     radio.miscSettings.split = !radio.miscSettings.split;
     update_split(radio.miscSettings.split);
     update_vfo_states();
 }
 
-void do_record(void) {
+void do_record_inc(void) {
     radio.record = !radio.record;
     update_record(radio.record);
 }
 
-void do_tx(void) {
+void do_tx_inc(void) {
     if (!radio.tx_lock) {
         radio.tx = !radio.tx;
         update_tx(radio.tx);

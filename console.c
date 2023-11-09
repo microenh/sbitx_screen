@@ -130,7 +130,7 @@ const gchar * const upper_case(const gchar *input) {
     return input;
 }
 
-bool do_help(const gchar * const data) {
+bool c_help(const gchar * const data) {
     // clear_console();
     erase_console();
     int i = 0;
@@ -141,17 +141,17 @@ bool do_help(const gchar * const data) {
     return false;
 }
 
-bool do_quit(const gchar * const data) {
+bool c_quit(const gchar * const data) {
     gtk_main_quit();
     return false;
 }
 
-bool do_clear(const gchar * const data) {
+bool c_clear(const gchar * const data) {
     erase_console();
     return false;
 }
 
-bool do_freq(const gchar * const data) {
+bool c_freq(const gchar * const data) {
     int f;
     if (gstrtoi(&f, data)) {
         do_frequency(f);
@@ -160,7 +160,7 @@ bool do_freq(const gchar * const data) {
     return false;
 }
 
-bool do_call(const gchar * const data) {
+bool c_call(const gchar * const data) {
     if (data)
         set_callsign(upper_case(data));
     GString *text = g_string_new(NULL);
@@ -170,7 +170,7 @@ bool do_call(const gchar * const data) {
     return false;
 }
 
-bool do_grid(const gchar * const data) {
+bool c_grid(const gchar * const data) {
     if (data)
         set_grid(data);
     GString *text = g_string_new(NULL);
@@ -180,7 +180,7 @@ bool do_grid(const gchar * const data) {
     return false;
 }
 
-bool do_tx_lock(const gchar * const data) {
+bool c_tx_lock(const gchar * const data) {
     if (data)
         set_tx_lock(strcmp(upper_case(data), off_on[0]));
     GString *text = g_string_new(NULL);
@@ -191,19 +191,108 @@ bool do_tx_lock(const gchar * const data) {
     
 }
 
+bool c_step(const gchar * const data) {
+    if (data) {
+        Step s;
+        upper_case(data);
+        for (s=0; s<s_END; s++) {
+            if (!strcmp(data, steps[s]))
+                break;
+        }
+        GString *text = g_string_new(NULL);
+        if (s != s_END) {
+            do_step(s);
+            g_string_printf(text, "Step: %s", data);
+        } else {
+            g_string_printf(text, "Bad step: %s", data);
+        }
+        update_console(text->str);
+        g_string_free(text, true);
+    }
+    return false;
+}
+
+bool c_vfo(const gchar * const data) {
+    if (data) {
+        Vfo i;
+        upper_case(data);
+        for (i=0; i<v_END; i++) {
+            if (!strcmp(data, vfos[i]))
+                break;
+        }
+        GString *text = g_string_new(NULL);
+        if (i != v_END) {
+            do_vfo(i);
+            g_string_printf(text, "VFO: %s", data);
+        } else {
+            g_string_printf(text, "Bad VFO: %s", data);
+        }
+        update_console(text->str);
+        g_string_free(text, true);
+    }
+    return false;
+}
+
+bool c_span(const gchar * const data) {
+    if (data) {
+        Span i;
+        upper_case(data);
+        for (i=0; i<sp_END; i++) {
+            if (!strcmp(data, spans[i]))
+                break;
+        }
+        GString *text = g_string_new(NULL);
+        if (i != sp_END) {
+            do_span(i);
+            g_string_printf(text, "Span: %s", data);
+        } else {
+            g_string_printf(text, "Bad span: %s", data);
+        }
+        update_console(text->str);
+        g_string_free(text, true);
+    }
+    return false;
+}
+
+bool c_rit(const gchar * const data) {
+    // if (data) {
+    //     Span i;
+    //     upper_case(data);
+    //     for (i=0; i<sp_END; i++) {
+    //         if (!strcmp(data, spans[i]))
+    //             break;
+    //     }
+    //     GString *text = g_string_new(NULL);
+    //     if (i != sp_END) {
+    //         do_span(i);
+    //         g_string_printf(text, "Span: %s", data);
+    //     } else {
+    //         g_string_printf(text, "Bad span: %s", data);
+    //     }
+    //     update_console(text->str);
+    //     g_string_free(text, true);
+    // }
+    // return false;
+}
+
+
 struct _dispatch {
     const gchar * const command;
     bool (*callback)(gchar const * const data);
 };
 
 static const struct _dispatch const dispatch[] = {
-    {"H", do_help},
-    {"Q", do_quit},
-    {"C", do_clear},
-    {"F", do_freq},
-    {"CALL", do_call},
-    {"GRID", do_grid},
-    {"LOCK", do_tx_lock},
+    {"H", c_help},
+    {"Q", c_quit},
+    {"C", c_clear},
+    {"F", c_freq},
+    {"CALL", c_call},
+    {"GRID", c_grid},
+    {"LOCK", c_tx_lock},
+    {"STEP", c_step},
+    {"VFO", c_vfo},
+    {"SPAN", c_span},
+    {"RIT", c_rit},
     {NULL, NULL}
 };
 

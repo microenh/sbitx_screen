@@ -353,15 +353,15 @@ void btn_30m_clicked_cb(GtkButton *b) {do_band(b_30m);}
 void btn_40m_clicked_cb(GtkButton *b) {do_band(b_40m);}
 void btn_80m_clicked_cb(GtkButton *b) {do_band(b_80m);}
 
-void btn_agc_clicked_cb(GtkButton *b) {do_agc();}
+void btn_agc_clicked_cb(GtkButton *b) {do_agc_inc();}
 void btn_mode_clicked_cb(GtkButton *b) {do_mode_inc();}
-void btn_split_clicked_cb(GtkButton *b) {do_split();}
-void btn_record_clicked_cb(GtkButton *b) {do_record();}
-void btn_rx_tx_clicked_cb(GtkButton *b) {do_tx();}
-void btn_rit_clicked_cb(GtkButton *b) {do_rit();}
-void btn_span_clicked_cb(GtkButton *b) {do_span();}
-void btn_vfo_clicked_cb(GtkButton *b) {do_vfo();}
-void btn_step_clicked_cb(GtkButton *b) {do_step();}
+void btn_split_clicked_cb(GtkButton *b) {do_split_inc();}
+void btn_record_clicked_cb(GtkButton *b) {do_record_inc();}
+void btn_rx_tx_clicked_cb(GtkButton *b) {do_tx_inc();}
+void btn_rit_clicked_cb(GtkButton *b) {do_rit_inc();}
+void btn_span_clicked_cb(GtkButton *b) {do_span_inc();}
+void btn_vfo_clicked_cb(GtkButton *b) {do_vfo_inc();}
+void btn_step_clicked_cb(GtkButton *b) {do_step_inc();}
 
 void ent_command_activate_cb(GtkEntry *e) {do_console_entry();}
 
