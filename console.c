@@ -7,11 +7,11 @@
 #include "console.h"
 #include "display.h"
 #include "radio_state.h"
+#include "settings.h"
 
 const int CONSOLE_LINES = 21;
 
-
-void update_console(const gchar *text) {
+void update_console(const gchar * const text) {
     GtkTextIter iter;
     gtk_text_buffer_get_end_iter(tb_console, &iter);
     gtk_text_buffer_insert(tb_console, &iter, text, -1);
@@ -77,7 +77,7 @@ void clear_console() {
  */
 
 
-const gchar *help_text[] = {
+const gchar * const help_text[] = {
     "HELP",
     "quit",
     "clear",
@@ -107,7 +107,7 @@ const gchar *help_text[] = {
 
 // returns true and places result in *result if good integer text in input
 // returns false and doesn't update *result if bad integer text in input
-bool gstrtoi(int *result, gchar *input) {
+bool gstrtoi(int *result, const gchar *input) {
     int r = 0;
     while (*input) {
         if (*input >= '0' && *input <= '9') {
@@ -121,7 +121,16 @@ bool gstrtoi(int *result, gchar *input) {
     return true;
 }
 
-bool do_help(gchar *data) {
+const gchar * const upper_case(const gchar *input) {
+    gchar *c = (gchar *)input;
+    while (*c) {
+        *c = toupper(*c);
+        c++;
+    }
+    return input;
+}
+
+bool do_help(const gchar * const data) {
     // clear_console();
     erase_console();
     int i = 0;
@@ -132,17 +141,17 @@ bool do_help(gchar *data) {
     return false;
 }
 
-bool do_quit(gchar *data) {
+bool do_quit(const gchar * const data) {
     gtk_main_quit();
     return false;
 }
 
-bool do_clear(gchar *data) {
+bool do_clear(const gchar * const data) {
     erase_console();
     return false;
 }
 
-bool do_freq(gchar *data) {
+bool do_freq(const gchar * const data) {
     int f;
     if (gstrtoi(&f, data)) {
         do_frequency(f);
@@ -151,46 +160,89 @@ bool do_freq(gchar *data) {
     return false;
 }
 
-typedef bool (*CB_FUNC)(gchar *data);
+bool do_call(const gchar * const data) {
+    if (data)
+        set_callsign(upper_case(data));
+    GString *text = g_string_new(NULL);
+    g_string_printf(text, "Call: %s", get_callsign());
+    update_console(text->str);
+    g_string_free(text, true);
+    return false;
+}
 
+bool do_grid(const gchar * const data) {
+    if (data)
+        set_grid(data);
+    GString *text = g_string_new(NULL);
+    g_string_printf(text, "Grid: %s", get_grid());
+    update_console(text->str);
+    g_string_free(text, true);
+    return false;
+}
 
-typedef struct _dispatch {
-    const gchar *command;
-    CB_FUNC callback;
-} DISPATCH;
+bool do_tx_lock(const gchar * const data) {
+    if (data)
+        set_tx_lock(strcmp(upper_case(data), off_on[0]));
+    GString *text = g_string_new(NULL);
+    g_string_printf(text, "Tx Lock: %s", off_on[get_tx_lock()]);
+    update_console(text->str);
+    g_string_free(text, true);
+    return false;
+    
+}
 
-static const DISPATCH dispatch[] = {
+struct _dispatch {
+    const gchar * const command;
+    bool (*callback)(gchar const * const data);
+};
+
+static const struct _dispatch const dispatch[] = {
     {"H", do_help},
     {"Q", do_quit},
     {"C", do_clear},
     {"F", do_freq},
+    {"CALL", do_call},
+    {"GRID", do_grid},
+    {"LOCK", do_tx_lock},
     {NULL, NULL}
 };
 
-
-void do_command(gchar *command, gchar *data) {
-    int i;
-    if (data && gstrtoi(&i, data)) {
-        GString *text = g_string_new(NULL);
-        g_string_printf(text, "%s: %d", command, i);
-        update_console(text->str);
-        g_string_free(text, true);    
-    }
-}
-
-void parse_command(GString *command) {
+void parse_command(const GString * const command) {
     gchar *command_token;
     gchar *data_token = NULL;
     const char *s = " ";
     command_token = strtok(command->str, s);
     if (command_token) {
         data_token = strtok(NULL, s);
+        upper_case(command_token);
+    }
+    // check for 10M .. 80M
+    for (Band b=0; b<b_END; b++) {
+        if (g_str_equal(command_token, bands[b])) {
+            do_band(b);
+            GString *text = g_string_new(NULL);
+            g_string_printf(text, "Band: %s", command_token);
+            update_console(text->str);
+            g_string_free(text, true); 
+            return;   
+        }
+    }
+    // check for mode (LSB, USB, ...)
+    for (Mode m=0; m<m_END; m++) {
+        if (g_str_equal(command_token, modes[m])) {
+            do_mode(m);
+            GString *text = g_string_new(NULL);
+            g_string_printf(text, "Mode: %s", command_token);
+            update_console(text->str);
+            g_string_free(text, true);    
+            return;
+        }
     }
     for (int i=0; dispatch[i].command; i++) {
         if (g_str_equal(command_token, dispatch[i].command)) {
             if (dispatch[i].callback(data_token)) {
                 GString *text = g_string_new(NULL);
-                g_string_printf(text, "%s: %d", command_token, data_token);
+                g_string_printf(text, "%s: %s", command_token, data_token);
                 update_console(text->str);
                 g_string_free(text, true);    
             }
@@ -200,8 +252,7 @@ void parse_command(GString *command) {
 }
 
 void do_console_entry() {
-    GString *command = g_string_new(gtk_entry_get_text(ent_command));
-    g_string_ascii_up(command);
+    GString * const command = g_string_new(gtk_entry_get_text(ent_command));
     gtk_entry_set_text(ent_command, "");
     parse_command(command);
     g_string_free(command, true);

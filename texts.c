@@ -1,6 +1,6 @@
 #include "texts.h"
 
-const char *steps[] = {
+const char * const steps[] = {
     "1M",
     "100K",
     "10K",
@@ -18,7 +18,7 @@ const int step_values[] = {
     10
 };
 
-const char *spans[] = {
+const char * const spans[] = {
     "1.25K",
     "2.5K",
     "5K",
@@ -27,34 +27,44 @@ const char *spans[] = {
     "24K"
 };
 
-const char *modes[] = {
+const char * const modes[] = {
     "LSB",
     "USB",
-    "CW-R",
+    "CWR",
     "CW",
     "DT",
-    "DT-R"
+    "DTR"
 };
 
-const char *agcs[] = {
+const char * const agcs[] = {
     "OFF",
     "FAST",
     "MED",
     "SLOW"
 };
 
-const char *vfos[] = {
+const char * const vfos[] = {
     "A",
     "B"
 };
 
-const char *off_on[] = {
+const char * const off_on[] = {
     "OFF",
     "ON"
 };
 
-const char *rx_txs[] = {
+const char * const rx_txs[] = {
     "RX",
     "TX"
 };
 
+const char * const bands[] = {
+    "80M",
+    "40M",
+    "30M",
+    "20M",
+    "17M",
+    "15M",
+    "12M",
+    "10M"
+};

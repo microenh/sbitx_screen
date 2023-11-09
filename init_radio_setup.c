@@ -73,4 +73,6 @@ void initial_radio_settings(Radio *radio) {
     radio->subEncoder = se_af;
     radio->tx = false;
     radio->record = false;
+    strcpy(radio->callsign, "");
+    strcpy(radio->grid, "");
 }

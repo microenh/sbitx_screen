@@ -28,6 +28,7 @@ void update_split(bool on);
 void update_record(bool on);
 void update_rit(bool on);
 void update_tx(bool tx);
+void update_tx_enable(bool enable);
 
 // change colors
 void update_vfo_state(Vfo vfo, VfoState vfoState);

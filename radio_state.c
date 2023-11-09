@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "radio_state.h"
 #include "display.h"
+#include "hardware.h"
 
 static Radio radio;
 
@@ -154,15 +155,19 @@ void do_agc(void) {
     update_agc(agc);
 }
 
-void do_mode(void) {
+void do_mode_inc(void) {
     if (radio.tx) return;
     Mode mode = radio.vfoData[radio.vfo].mode;
     mode++;
     if (mode >= m_END)
         mode = 0;
-    radio.vfoData[radio.vfo].mode = mode;
-    update_mode(mode);
-    update_vfo_mode(radio.vfo, mode);
+    do_mode(mode);
+}
+
+void do_mode(Mode m) {
+    radio.vfoData[radio.vfo].mode = m;
+    update_mode(m);
+    update_vfo_mode(radio.vfo, m);
 }
 
 void do_span(void) {
@@ -226,9 +231,12 @@ void do_record(void) {
 }
 
 void do_tx(void) {
-    radio.tx = !radio.tx;
-    update_tx(radio.tx);
-    update_vfo_states();
+    if (!radio.tx_lock) {
+        radio.tx = !radio.tx;
+        update_tx(radio.tx);
+        update_vfo_states();
+        hw_set_tx(radio.tx);
+    }
 }
 
 void select_sub_encoder(SubEncoder item) {
@@ -278,6 +286,7 @@ void do_frequency(int frequency) {
     radio.vfoData[radio.vfo].frequency = frequency;
     update_vfo_frequency(radio.vfo, frequency);
     update_rit(radio.miscSettings.rit);
+    hw_set_frequency(adj_frequency(radio.vfo));
 }
 
 void do_main_encoder(int change) {
@@ -303,4 +312,36 @@ void do_main_encoder(int change) {
             update_vfo_frequency(i, adj_frequency(i));
         }
     }
+    hw_set_frequency(adj_frequency(radio.vfo));
+}
+
+const gchar * const get_callsign(void) {
+    return radio.callsign[0] ? radio.callsign : "Not set";
+}
+
+void set_callsign(const gchar * const callsign) {
+    strcpy(radio.callsign, callsign);
+}
+
+const gchar * const get_grid(void) {
+    return radio.grid[0] ? radio.grid : "Not set";
+}
+
+void set_grid(const gchar * const grid) {
+    strcpy(radio.grid, grid);
+}
+
+const bool get_tx_lock(void) {
+    return radio.tx_lock;
+}
+
+void set_tx_lock(const bool tx_lock) {
+    if (tx_lock) {
+        radio.tx = false;
+        update_tx(radio.tx);
+        update_vfo_states();
+        hw_set_tx(radio.tx);
+    }
+    update_tx_enable(!tx_lock);
+    radio.tx_lock = tx_lock;
 }

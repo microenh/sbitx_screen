@@ -54,6 +54,9 @@ static GtkLabel
     *vfo_frequency[v_END],
     *vfo_mode[v_END];
 
+static GtkButton
+    *btn_tx;
+
 GtkEntry* ent_command;
 GtkTextBuffer *tb_console;
 static GtkDrawingArea* dwg_panafall;
@@ -148,6 +151,8 @@ void init_display(int argc, char **argv) {
     vfo_mode[v_B] = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfob_mode"));
 
     dwg_panafall = GTK_DRAWING_AREA(gtk_builder_get_object(builder, "dwg_panafall"));
+
+    btn_tx = GTK_BUTTON(gtk_builder_get_object(builder, "btn_tx"));
 
     init_gpio_pins();
     g_timeout_add(125, heartbeat, NULL);
@@ -324,6 +329,11 @@ static void call_select_sub_encoder(SubEncoder item) {
     }
 }
 
+void update_tx_enable(bool enable) {
+    gtk_widget_set_sensitive(GTK_WIDGET(btn_tx), enable); 
+    update_css(GTK_WIDGET(lbl_tx), enable ? css_rx_active : css_rx_inactive);   
+}
+
 void btn_high_clicked_cb(GtkButton *b) {call_select_sub_encoder(se_high);}
 void btn_low_clicked_cb(GtkButton *b) {call_select_sub_encoder(se_low);}
 void btn_af_clicked_cb(GtkButton *b) {call_select_sub_encoder(se_af);}
@@ -344,7 +354,7 @@ void btn_40m_clicked_cb(GtkButton *b) {do_band(b_40m);}
 void btn_80m_clicked_cb(GtkButton *b) {do_band(b_80m);}
 
 void btn_agc_clicked_cb(GtkButton *b) {do_agc();}
-void btn_mode_clicked_cb(GtkButton *b) {do_mode();}
+void btn_mode_clicked_cb(GtkButton *b) {do_mode_inc();}
 void btn_split_clicked_cb(GtkButton *b) {do_split();}
 void btn_record_clicked_cb(GtkButton *b) {do_record();}
 void btn_rx_tx_clicked_cb(GtkButton *b) {do_tx();}
