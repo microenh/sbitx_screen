@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <gtk/gtk.h>
+
 #include "radio_state.h"
 #include "display.h"
 #include "hardware.h"
@@ -7,9 +9,9 @@ static Radio radio;
 
 static int adj;
 
-#define SETTINGS "settings.dat"
+static const gchar * const SETTINGS = "settings.dat";
 
-char prefix[6];
+GString *prefix;
 
 static Band get_band(void) {
     int f = radio.vfoData[radio.vfo].frequency;
@@ -59,6 +61,7 @@ static void update_display(void) {
     update_split(radio.miscSettings.split);
     update_record(radio.record);
     update_tx(radio.tx);
+    update_tx_enable(radio.tx);
     for (int i=0; i<se_END; i++) {
         update_level(i, radio.vfoData[radio.vfo].level[i]);
         update_level_highlight(i, i==radio.subEncoder);
@@ -113,24 +116,27 @@ void do_band(Band band) {
 }
 
 static void load_settings(void) {
-    char temp[25];
-    sprintf(temp, prefix, SETTINGS);
-    FILE *f = fopen(temp, "r");
+    GString *temp = g_string_new(NULL);
+    g_string_printf(temp, prefix->str, SETTINGS);
+    FILE *f = fopen(temp->str, "r");
     if (f) {
         fread(&radio, sizeof(radio), 1, f);
         fclose(f);
     } else {
         initial_radio_settings(&radio);
     }
-
+    g_string_free(temp, true);
 }
 
 void save_settings(void) {
-    char temp[25];
-    sprintf(temp, prefix, SETTINGS);
-    FILE *f = fopen(temp, "w");
+    radio.tx = false;
+    radio.subEncoder = se_af;
+    GString *temp = g_string_new(NULL);
+    g_string_printf(temp, prefix->str, SETTINGS);
+    FILE *f = fopen(temp->str, "w");
     fwrite(&radio, sizeof(radio), 1, f);
     fclose(f);
+    g_string_free(temp, true);
 }
 
 
@@ -145,24 +151,28 @@ void init_radio(void) {
     update_display();
 }
 
-void do_agc_inc(void) {
+void do_agc(Agc agc) {
     if (radio.tx) return;
-    Agc agc = radio.vfoData[radio.vfo].agc;
-    agc++;
-    if (agc >= a_END)
-        agc = 0;
     radio.vfoData[radio.vfo].agc = agc;    
     update_agc(agc);
 }
 
+void do_agc_inc(void) {
+    Agc agc = radio.vfoData[radio.vfo].agc;
+    agc++;
+    if (agc >= a_END)
+        agc = 0;
+    do_agc(agc);
+}
+
 void do_mode(Mode m) {
+    if (radio.tx) return;
     radio.vfoData[radio.vfo].mode = m;
     update_mode(m);
     update_vfo_mode(radio.vfo, m);
 }
 
 void do_mode_inc(void) {
-    if (radio.tx) return;
     Mode mode = radio.vfoData[radio.vfo].mode;
     mode++;
     if (mode >= m_END)
@@ -221,9 +231,9 @@ static int adj_frequency(Vfo vfo){
     return frequency;
 }
 
-void do_rit_inc(void) {
+void do_rit(bool on) {
     if (radio.tx) return;
-    radio.miscSettings.rit = !radio.miscSettings.rit;
+    radio.miscSettings.rit = on;
     update_rit(radio.miscSettings.rit);
     if (radio.miscSettings.rit_value) {
         for (int i=0; i<v_END; i++)
@@ -232,16 +242,28 @@ void do_rit_inc(void) {
     }
 }
 
-void do_split_inc(void) {
+void do_rit_inc(void) {
+    do_rit(!radio.miscSettings.rit);
+}
+
+void do_split(bool on) {
     if (radio.tx) return;
-    radio.miscSettings.split = !radio.miscSettings.split;
-    update_split(radio.miscSettings.split);
+    radio.miscSettings.split = on;
+    update_split(on);
     update_vfo_states();
 }
 
-void do_record_inc(void) {
-    radio.record = !radio.record;
+void do_split_inc(void) {
+    do_split(!radio.miscSettings.split);
+}
+
+void do_record(bool on) {
+    radio.record = on;
     update_record(radio.record);
+}
+
+void do_record_inc(void) {
+    do_record(!radio.record);
 }
 
 void do_tx_inc(void) {
@@ -261,26 +283,26 @@ void select_sub_encoder(SubEncoder item) {
     }  
 }
 
-void do_sub_encoder(int change) {
-    int rse = radio.subEncoder;
+void do_sub_encoder(SubEncoder rse, int i) {
     int min = subEncoderMin[rse];
     int max = subEncoderMax[rse];
-    int step = subEncoderStep[rse];
-    int i = radio.vfoData[radio.vfo].level[radio.subEncoder] + change * step;
     if (rse == se_high) {
-        min = radio.vfoData[radio.vfo].level[se_low] + step;
+        min = radio.vfoData[radio.vfo].level[se_low] + subEncoderStep[rse];
     }
     if (rse == se_low) {
-        max = radio.vfoData[radio.vfo].level[se_high] - step;
+        max = radio.vfoData[radio.vfo].level[se_high] - subEncoderStep[rse];
     }
     if (i < min)
         i = min;
     else if (i > max)
         i = max;    
-    if (i != radio.vfoData[radio.vfo].level[rse]) {
-        radio.vfoData[radio.vfo].level[rse] = i;
-        update_level(rse, i);
-    }
+    radio.vfoData[radio.vfo].level[rse] = i;
+    update_level(rse, i);
+}
+
+void do_sub_encoder_inc(int change) {
+    do_sub_encoder(radio.subEncoder,
+        radio.vfoData[radio.vfo].level[radio.subEncoder] + change * subEncoderStep[radio.subEncoder]);
 }
 
 const int FREQ_MIN = 1000;

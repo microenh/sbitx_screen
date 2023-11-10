@@ -68,3 +68,16 @@ const char * const bands[] = {
     "12M",
     "10M"
 };
+
+
+const char * const subEncoders[] = {
+    "AF",
+    "COMP",
+    "HIGH",
+    "IF",
+    "LOW",
+    "MIC",
+    "PITCH",
+    "POWER",
+    "WPM"
+};

@@ -77,7 +77,7 @@ void clear_console() {
  */
 
 
-const gchar * const help_text[] = {
+static const gchar * const help_text[] = {
     "HELP",
     "quit",
     "clear",
@@ -160,54 +160,50 @@ bool c_freq(const gchar * const data) {
     return false;
 }
 
+
+static const gchar * const bad_good[] = {
+    "Bad ",
+    ""
+};
+
+static void console_feedback(const gchar * const param, const gchar * const data, bool good) {
+    GString *text = g_string_new(NULL);
+    g_string_printf(text, "%s%s: %s", bad_good[good], param, data);
+    update_console(text->str);
+    g_string_free(text, true);
+}
+
 bool c_call(const gchar * const data) {
     if (data)
         set_callsign(upper_case(data));
-    GString *text = g_string_new(NULL);
-    g_string_printf(text, "Call: %s", get_callsign());
-    update_console(text->str);
-    g_string_free(text, true);
+    console_feedback("Call", get_callsign(), true);
     return false;
 }
 
 bool c_grid(const gchar * const data) {
     if (data)
         set_grid(data);
-    GString *text = g_string_new(NULL);
-    g_string_printf(text, "Grid: %s", get_grid());
-    update_console(text->str);
-    g_string_free(text, true);
+    console_feedback("Grid", get_grid(), true);
     return false;
 }
 
 bool c_tx_lock(const gchar * const data) {
     if (data)
         set_tx_lock(strcmp(upper_case(data), off_on[0]));
-    GString *text = g_string_new(NULL);
-    g_string_printf(text, "Tx Lock: %s", off_on[get_tx_lock()]);
-    update_console(text->str);
-    g_string_free(text, true);
+    console_feedback("Tx Lock", off_on[get_tx_lock()], true);
     return false;
-    
 }
 
 bool c_step(const gchar * const data) {
     if (data) {
-        Step s;
+        Step i;
         upper_case(data);
-        for (s=0; s<s_END; s++) {
-            if (!strcmp(data, steps[s]))
-                break;
-        }
-        GString *text = g_string_new(NULL);
-        if (s != s_END) {
-            do_step(s);
-            g_string_printf(text, "Step: %s", data);
-        } else {
-            g_string_printf(text, "Bad step: %s", data);
-        }
-        update_console(text->str);
-        g_string_free(text, true);
+        for (i=0; i<s_END && strcmp(data, steps[i]); i++)
+            ;
+        bool good = i != s_END;
+        if (good) 
+            do_step(i);
+        console_feedback("Step", data, good);
     }
     return false;
 }
@@ -216,19 +212,12 @@ bool c_vfo(const gchar * const data) {
     if (data) {
         Vfo i;
         upper_case(data);
-        for (i=0; i<v_END; i++) {
-            if (!strcmp(data, vfos[i]))
-                break;
-        }
-        GString *text = g_string_new(NULL);
-        if (i != v_END) {
+        for (i=0; i<v_END && strcmp(data, vfos[i]); i++)
+            ;
+        bool good = i != v_END;
+        if (good) 
             do_vfo(i);
-            g_string_printf(text, "VFO: %s", data);
-        } else {
-            g_string_printf(text, "Bad VFO: %s", data);
-        }
-        update_console(text->str);
-        g_string_free(text, true);
+        console_feedback("VFO", data, good);
     }
     return false;
 }
@@ -237,43 +226,78 @@ bool c_span(const gchar * const data) {
     if (data) {
         Span i;
         upper_case(data);
-        for (i=0; i<sp_END; i++) {
-            if (!strcmp(data, spans[i]))
-                break;
-        }
-        GString *text = g_string_new(NULL);
-        if (i != sp_END) {
+        for (i=0; i<sp_END && strcmp(data, spans[i]); i++)
+            ;
+        bool good = i != sp_END;
+        if (good) 
             do_span(i);
-            g_string_printf(text, "Span: %s", data);
-        } else {
-            g_string_printf(text, "Bad span: %s", data);
-        }
-        update_console(text->str);
-        g_string_free(text, true);
+        console_feedback("Span", data, good);
     }
     return false;
 }
 
 bool c_rit(const gchar * const data) {
-    // if (data) {
-    //     Span i;
-    //     upper_case(data);
-    //     for (i=0; i<sp_END; i++) {
-    //         if (!strcmp(data, spans[i]))
-    //             break;
-    //     }
-    //     GString *text = g_string_new(NULL);
-    //     if (i != sp_END) {
-    //         do_span(i);
-    //         g_string_printf(text, "Span: %s", data);
-    //     } else {
-    //         g_string_printf(text, "Bad span: %s", data);
-    //     }
-    //     update_console(text->str);
-    //     g_string_free(text, true);
-    // }
-    // return false;
+    if (data) {
+        upper_case(data);
+        bool b = (!strcmp(data, off_on[1]));
+        do_rit(b);
+        console_feedback("RIT", off_on[b], true);
+    }
+    return false;
 }
+
+bool c_split(const gchar * const data) {
+    if (data) {
+        upper_case(data);
+        bool b = (!strcmp(data, off_on[1]));
+        do_split(b);
+        console_feedback("Split", off_on[b], true);
+    }
+    return false;
+}
+
+bool c_record(const gchar * const data) {
+    if (data) {
+        upper_case(data);
+        bool b = (!strcmp(data, off_on[1]));
+        do_record(b);
+        console_feedback("Record", off_on[b], true);
+    }
+    return false;
+}
+
+bool c_agc(const gchar * const data) {
+    if (data) {
+        Agc i;
+        upper_case(data);
+        for (i=0; i<a_END && strcmp(data, agcs[i]); i++)
+            ;
+        bool good = i != a_END;
+        if (good) 
+            do_agc(i);
+        console_feedback("AGC", data, good);
+    }
+    return false;
+}
+
+static bool c_subEncoder(const SubEncoder rse, const gchar * const data) {
+    int i;
+    if (gstrtoi(&i, data)) {
+        do_sub_encoder(rse, i);
+        return false;
+    }
+    return true;
+}
+
+// bool c_af(const gchar * const data) {return c_subEncoder(se_af, data);}
+// bool c_comp(const gchar * const data) {return c_subEncoder(se_comp, data);}
+// bool c_high(const gchar * const data) {return c_subEncoder(se_high, data);}
+// bool c_if(const gchar * const data) {return c_subEncoder(se_if, data);}
+// bool c_low(const gchar * const data) {return c_subEncoder(se_low, data);}
+// bool c_mic(const gchar * const data) {return c_subEncoder(se_mic, data);}
+// bool c_pitch(const gchar * const data) {return c_subEncoder(se_pitch, data);}
+// bool c_power(const gchar * const data) {return c_subEncoder(se_power, data);}
+// bool c_wpm(const gchar * const data) {return c_subEncoder(se_wpm, data);}
 
 
 struct _dispatch {
@@ -293,6 +317,18 @@ static const struct _dispatch const dispatch[] = {
     {"VFO", c_vfo},
     {"SPAN", c_span},
     {"RIT", c_rit},
+    {"SPLIT", c_split},
+    {"REC", c_record},
+    {"AGC", c_agc},
+    // {"AF", c_af},
+    // {"COMP", c_comp}.
+    // {"HIGH", c_high},
+    // {"IF", c_if},
+    // {"LOW", c_low},
+    // {"MIC", c_mic},
+    // {"PITCH", c_pitch},
+    // {"POWER", c_power},
+    // {"WPM", c_wpm},
     {NULL, NULL}
 };
 
@@ -309,10 +345,7 @@ void parse_command(const GString * const command) {
     for (Band b=0; b<b_END; b++) {
         if (g_str_equal(command_token, bands[b])) {
             do_band(b);
-            GString *text = g_string_new(NULL);
-            g_string_printf(text, "Band: %s", command_token);
-            update_console(text->str);
-            g_string_free(text, true); 
+            console_feedback("Band", command_token, true);
             return;   
         }
     }
@@ -320,11 +353,14 @@ void parse_command(const GString * const command) {
     for (Mode m=0; m<m_END; m++) {
         if (g_str_equal(command_token, modes[m])) {
             do_mode(m);
-            GString *text = g_string_new(NULL);
-            g_string_printf(text, "Mode: %s", command_token);
-            update_console(text->str);
-            g_string_free(text, true);    
+            console_feedback("Mode", command_token, true);
             return;
+        }
+    }
+    // check for sub-encoder settings
+    for (SubEncoder s=0; s<se_END; s++) {
+        if (g_str_equal(command_token, subEncoders[s])) {
+            c_subEncoder(s, data_token);        
         }
     }
     for (int i=0; dispatch[i].command; i++) {

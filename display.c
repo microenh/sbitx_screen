@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <ctype.h>
 #include <time.h>
+#include <gtk/gtk.h>
 
 #include "display.h"
 #include "radio_state.h"
@@ -10,8 +11,8 @@
 #include "update_css.h"
 #include "console.h"
 
-#define GLADE "sbitx_screen.glade"
-#define CSS "main.css"
+static const gchar * const GLADE = "sbitx_screen.glade";
+static const gchar * const CSS = "main.css";
 
 typedef enum _offOn {
     o_off,
@@ -22,19 +23,21 @@ typedef enum _offOn {
 static void open_glade_and_css(GtkBuilder **builder, GtkCssProvider **css_provider) {
 	// look for glade and css files in either the current directory or the one above it
 	// i.e. if the file is in a build folder off the main directory
-	char temp[25];
+    GString *temp = g_string_new(NULL);
+
 	FILE *f = fopen(GLADE, "r");
 	if (f) {
 		fclose(f);
-		strcpy(prefix, "%s");
+        g_string_assign(prefix, "%s");
 	} else {
-		strcpy(prefix, "../%s");
+        g_string_assign(prefix, "../%s");
 	}
-	sprintf(temp, prefix, GLADE);
-	*builder = gtk_builder_new_from_file(temp);
-	sprintf(temp, prefix, CSS);
+	g_string_printf(temp, prefix->str, GLADE);
+	*builder = gtk_builder_new_from_file(temp->str);
+	g_string_printf(temp, prefix->str, CSS);
 	*css_provider = gtk_css_provider_new();
-	gtk_css_provider_load_from_path(*css_provider, temp, NULL);
+	gtk_css_provider_load_from_path(*css_provider, temp->str, NULL);
+    g_string_free(temp, true);
 }
 
 static GtkWidget *window;
@@ -90,7 +93,7 @@ int heartbeat(gpointer data) {
         }
     }
     if (level_ticks) {
-        do_sub_encoder(level_ticks);
+        do_sub_encoder_inc(level_ticks);
         level_ticks = 0;
         if (sub_reset)
             sub_reset = SUB_RESET;
@@ -105,6 +108,7 @@ int heartbeat(gpointer data) {
 
 void init_display(int argc, char **argv) {
 	gtk_init(&argc, &argv); // init Gtk
+    prefix = g_string_new(NULL);
 
     //---------------------------------------------------------------------
     // establish contact with xml code used to adjust widget settings

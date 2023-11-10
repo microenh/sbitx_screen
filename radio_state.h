@@ -2,7 +2,6 @@
 
 #include <stdbool.h>
 #include <gtk/gtk.h>
-#include <gtk/gtkx.h>
 
 #include "settings.h"
 
@@ -51,11 +50,14 @@ void initial_radio_settings(Radio *radio);
 
 void select_sub_encoder(SubEncoder item);
 
+void do_agc(Agc a);
 void do_agc_inc(void);
 void do_mode(Mode m);
 void do_mode_inc(void);
+void do_record(bool on);
 void do_record_inc(void);
 void do_tx_inc(void);
+void do_rit(bool on);
 void do_rit_inc(void);
 void do_span(Span s);
 void do_span_inc(void);
@@ -63,14 +65,16 @@ void do_vfo(Vfo v);
 void do_vfo_inc(void);
 void do_step(Step s);
 void do_step_inc(void);
+void do_split(bool on);
 void do_split_inc(void);
 void do_band(Band band);
 
-void do_sub_encoder(int change);
+void do_sub_encoder(SubEncoder rse, int value);
+void do_sub_encoder_inc(int change);
 void do_main_encoder(int change);
 void do_frequency(int frequency);
 
-extern char prefix[];
+extern GString *prefix;
 
 void save_settings(void);
 
