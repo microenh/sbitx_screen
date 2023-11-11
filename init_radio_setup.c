@@ -1,9 +1,9 @@
 #include "radio_state.h"
 
 void initial_radio_settings(Radio *radio) {
-    int level[3][se_END];
+    int level[BAND_STACK_SIZE][se_END];
     for (int i=0; i<se_END; i++)
-        for (int j=0; j<3; j++)
+        for (int j=0; j<BAND_STACK_SIZE; j++)
             level[j][i] = 0;
 
     level[0][se_low] = 350;
@@ -19,7 +19,7 @@ void initial_radio_settings(Radio *radio) {
     level[2][se_pitch] = 1500;
     level[2][se_wpm] = 13;
 
-    MiscSettings miscSettings = {
+    static MiscSettings miscSettings = {
         .rit = false,
         .rit_value = 0,
         .split = false,
@@ -27,11 +27,11 @@ void initial_radio_settings(Radio *radio) {
         .step = s_10Hz
     };
 
-    Agc agcs[3] = {a_fast, a_slow, a_off};
-    Mode modes[3] = {m_cw, m_lsb, m_data};
+    static Agc agcs[BAND_STACK_SIZE] = {a_fast, a_slow, a_off};
+    static Mode modes[BAND_STACK_SIZE] = {m_cw, m_lsb, m_data};
 
     VfoData vfoData;
-    int frequencies[b_END][3] = {
+    static int frequencies[b_END][BAND_STACK_SIZE] = {
         { 3530000,  3815000,  3573000},
         { 7030000,  7215000,  7074000},
         {10105000, 10110000, 10136000},
@@ -42,7 +42,7 @@ void initial_radio_settings(Radio *radio) {
         {28030000, 24330000, 28074000}
     };
 
-    Step steps[3] = {s_10Hz, s_100Hz, s_10Hz};
+    static Step steps[BAND_STACK_SIZE] = {s_10Hz, s_100Hz, s_10Hz};
 
     for (int b=0; b<b_END; b++) {
         radio->bandStack->current = 0;

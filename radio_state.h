@@ -5,7 +5,9 @@
 
 #include "settings.h"
 
-#define BAND_STACK_SIZE 3
+
+
+enum {BAND_STACK_SIZE = 3};
 
 typedef struct _vfoData {
     Agc agc;
@@ -86,3 +88,6 @@ void set_grid(const gchar * const grid);
 
 const bool get_tx_lock(void);
 void set_tx_lock(const bool tx_lock);
+
+const Mode get_mode(void);
+const int get_rx_pitch(void);

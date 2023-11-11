@@ -381,3 +381,11 @@ void set_tx_lock(const bool tx_lock) {
     update_tx_enable(!tx_lock);
     radio.tx_lock = tx_lock;
 }
+
+const Mode get_mode(void) {
+    return radio.vfoData[radio.vfo].mode;
+}
+
+const int get_rx_pitch(void) {
+    return radio.vfoData[radio.vfo].level[se_pitch];
+}
