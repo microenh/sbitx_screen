@@ -48,6 +48,7 @@ typedef struct _radio {
 } Radio;
 
 void init_radio(void);
+void close_radio(void);
 void initial_radio_settings(Radio *radio);
 
 void select_sub_encoder(SubEncoder item);

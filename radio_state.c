@@ -7,7 +7,7 @@
 
 static Radio radio;
 
-static int adj;
+static int adj;  // change to adjust frequency display mod step
 
 static const gchar * const SETTINGS = "settings.dat";
 
@@ -32,6 +32,13 @@ static Band get_band(void) {
     else if (f >= 28000000 && f <= 29700000)
         return b_10m;
     return b_END;
+}
+
+static int adj_frequency(Vfo vfo){
+    int frequency = radio.vfoData[vfo].frequency;
+    if (radio.miscSettings.rit)
+        frequency += radio.miscSettings.rit_value;
+    return frequency;
 }
 
 static void update_vfo_states(void) {
@@ -112,6 +119,7 @@ void do_band(Band band) {
     radio.subEncoder = se_af;
     radio.tx = false;
     radio.record = false;
+    hw_set_frequency(adj_frequency(radio.vfo));
     update_display();
 }
 
@@ -147,8 +155,14 @@ static const int subEncoderMax[]  = {100,  100, 4000, 100, 1000, 100,  1500,   1
 static const int subEncoderStep[] = {  1,    1,   50,   1,   50,   1,    10,     1,   1};
 
 void init_radio(void) {
-    load_settings();    
+    hw_init();
+    load_settings(); 
+    hw_set_frequency(adj_frequency(radio.vfo));   
     update_display();
+}
+
+void close_radio(void) {
+    hw_close();
 }
 
 void do_agc(Agc agc) {
@@ -222,13 +236,6 @@ void do_step_inc(void) {
     if (step >= s_END)
         step = 0;
     do_step(step);
-}
-
-static int adj_frequency(Vfo vfo){
-    int frequency = radio.vfoData[vfo].frequency;
-    if (radio.miscSettings.rit)
-        frequency += radio.miscSettings.rit_value;
-    return frequency;
 }
 
 void do_rit(bool on) {

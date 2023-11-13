@@ -12,7 +12,8 @@
 			"libgen.h": "c",
 			"stdbool.h": "c",
 			"string.h": "c",
-			"gmodule.h": "c"
+			"gmodule.h": "c",
+			"math.h": "c"
 		},
 		"cmake.generator": "Ninja"
 	}
