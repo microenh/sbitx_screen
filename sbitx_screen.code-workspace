@@ -13,7 +13,8 @@
 			"stdbool.h": "c",
 			"string.h": "c",
 			"gmodule.h": "c",
-			"math.h": "c"
+			"math.h": "c",
+			"sdr.h": "c"
 		},
 		"cmake.generator": "Ninja"
 	}
