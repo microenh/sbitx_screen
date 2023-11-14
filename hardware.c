@@ -1,11 +1,17 @@
 #include <stdbool.h>
-#include "hardware.h"
-#include "radio_state.h"
-#include "si5351.h"
-#include "wiringPi.h"
+
 #include "console.h"
+#include "hardware.h"
+#include "queue.h"
+#include "radio_state.h"
+#include "sdr.h"
+#include "si5351.h"
+#include "sound.h"
+#include "wiringPi.h"
 
 void hw_set_tx(bool tx) {}
+
+struct Queue qremote;
 
 const int BFO_FREQ = 40035000;
 const int BFO_OFFSET = 24000;
@@ -79,8 +85,50 @@ void hw_set_frequency(int frequency) {
     prev_freq = frequency;
 }
 
+
+
+void setup_audio_codec(){
+    GString * const audio_card = g_string_new("hw:0");
+
+	//configure all the channels of the mixer
+	sound_mixer(audio_card->str, "Input Mux", 0);
+	sound_mixer(audio_card->str, "Line", 1);
+	sound_mixer(audio_card->str, "Mic", 0);
+	sound_mixer(audio_card->str, "Mic Boost", 0);
+	sound_mixer(audio_card->str, "Playback Deemphasis", 0);
+ 
+	sound_mixer(audio_card->str, "Master", 10);
+	sound_mixer(audio_card->str, "Output Mixer HiFi", 1);
+	sound_mixer(audio_card->str, "Output Mixer Mic Sidetone", 0);
+
+    g_string_free(audio_card, true);
+}
+
+void setup_oscillators(){
+	// initialize the SI5351
+
+	delay(200);
+	si5351bx_init();
+	delay(200);
+	si5351bx_setfreq(1, BFO_FREQ);
+
+	// delay(200);
+	// si5351bx_setfreq(1, bfo_freq);
+
+	// si5351_reset();
+}
+
 void hw_init(void) {
+    fft_init();
+    q_init(&qremote, 8000);
+
+    add_rx(7000000, m_lsb, -3000, -300);
+    rx_list->tuned_bin = 512;
+
     si5351bx_init();
+    setup_oscillators();
+    setup_audio_codec();
+    sound_thread_start("plughw:0,0");
 }
 
 void hw_close(void) {
@@ -89,3 +137,4 @@ void hw_close(void) {
         si5351a_clkoff(i);
     set_lpf_40mhz(-1);
 }
+

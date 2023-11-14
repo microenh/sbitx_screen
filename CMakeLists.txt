@@ -19,9 +19,11 @@ add_executable(sbitx_screen ${sources})
 
 target_link_libraries(sbitx_screen
   ${GTK3_LIBRARIES}
-  wiringPi
+  asound
   fftw3f
   m
+  pthread
+  wiringPi
   )
 
 include(CTest)

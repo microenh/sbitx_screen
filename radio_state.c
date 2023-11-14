@@ -396,3 +396,7 @@ const Mode get_mode(void) {
 const int get_rx_pitch(void) {
     return radio.vfoData[radio.vfo].level[se_pitch];
 }
+
+const bool in_tx(void) {
+    return radio.tx;
+}

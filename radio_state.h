@@ -92,3 +92,5 @@ void set_tx_lock(const bool tx_lock);
 
 const Mode get_mode(void);
 const int get_rx_pitch(void);
+
+const bool in_tx(void);

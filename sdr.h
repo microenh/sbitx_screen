@@ -88,36 +88,6 @@ enum {
 
 
 
-
-struct rx {
-	long tuned_bin;	// tuned bin (this should translate to freq) 
-	short mode;		// USB/LSB/AM/FM (cw is narrow SSB, so not listed)
-					// FFT plan to convert back to time domain
-	int low_hz; 
-	int high_hz;
-	fftwf_plan plan_rev;
-	fftwf_complex *fft_freq;
-    float *fft_time;
- 
-	// agc() is called once for every block of samples. The samples
-	// are in time-domain. Consider each call to agc as a 'tick'.
-	// agc_speed is the max ticks that the agc will hang for
-	// agc_loop tracks how many more ticks to go before the decay
-	// agc_decay rate sets the slope for agc decay.
-	
-	int agc_speed;
-	int agc_threshold;
-	int agc_loop;
-	double signal_strength;
-	double agc_gain;
-	int agc_decay_rate;
-	double signal_avg;
-
-	struct filter *filter;	// convolution filter
-	int output;				// -1 = nowhere, 0 = audio, rest is a tcp socket
-	struct rx* next;
-};
-
 // fft_filter.c
 struct filter {
 	fftwf_complex *fir_coeff;
@@ -147,6 +117,11 @@ int vfo_read(struct vfo *v);
 
 // fft.c
 void fft_init();
+void add_rx(int frequency, short mode, int bpf_low, int bpf_high);
+void rx_process(
+	int32_t *input_rx, int32_t *input_mic, 
+	int32_t *output_speaker, int32_t *output_tx, 
+	int n_samples);
 
 // sbitc_sdr.c
 struct rx {
@@ -177,5 +152,10 @@ struct rx {
 	int output;				// -1 = nowhere, 0 = audio, rest is a tcp socket
 	struct rx* next;
 };
+
+void sound_process(
+	int32_t *input_rx, int32_t *input_mic, 
+	int32_t *output_speaker, int32_t *output_tx, 
+	int n_samples);
 
 extern struct rx *rx_list;
