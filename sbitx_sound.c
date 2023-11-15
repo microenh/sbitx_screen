@@ -4,6 +4,7 @@
 #include <time.h>
 #include <wiringPi.h>
 
+#include "display.h"
 #include "queue.h"
 #include "sdr.h"
 #include "sound.h"
@@ -75,6 +76,7 @@ void sound_volume(char *card_name, char *element, int volume) {
 }
 
 void sound_mixer(char *card_name, char *element, int make_on) {
+	// update_console(element);
     long min, max;
     snd_mixer_t *handle;
     snd_mixer_selem_id_t *sid;
@@ -95,23 +97,23 @@ void sound_mixer(char *card_name, char *element, int make_on) {
 	*/
     // find out if the his element is capture side or plaback
     if(snd_mixer_selem_has_capture_switch(elem)){
-		// puts("this is a capture switch.");  
+		// update_console("** this is a capture switch.");  
 	  	snd_mixer_selem_set_capture_switch_all(elem, make_on);
     } else if (snd_mixer_selem_has_playback_switch(elem)){
-		//	puts("this is a playback switch.");
+		// update_console("** this is a playback switch.");
         snd_mixer_selem_set_playback_switch_all(elem, make_on);
     } else if (snd_mixer_selem_has_playback_volume(elem)){
-        //puts("this is  playback volume");
+        // update_console("** this is playback volume");
         long volume = make_on;
     	snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
     	snd_mixer_selem_set_playback_volume_all(elem, volume * max / 100);
     } else if (snd_mixer_selem_has_capture_volume(elem)){
-		//	puts("this is a capture volume");
+		// update_console("** this is a capture volume");
         long volume = make_on;
     	snd_mixer_selem_get_capture_volume_range(elem, &min, &max);
     	snd_mixer_selem_set_capture_volume_all(elem, volume * max / 100);
     } else if (snd_mixer_selem_is_enumerated(elem)){
-    	// puts("TBD: this is an enumerated capture element");
+    	// update_console("** TBD: this is an enumerated capture element");
         snd_mixer_selem_set_enum_item(elem, 0, make_on);
     }
     snd_mixer_close(handle);
@@ -559,7 +561,7 @@ int sound_loop(){
     // Note: the virtual cable samples queue should be flushed at the start of tx
     qloop.stall = 1;
 
-    while(sound_thread_continue) {
+    while (sound_thread_continue) {
 
 		// restart the pcm capture if there is an error reading the samples
 		// this is opened as a blocking device, hence we derive accurate timing 
@@ -569,7 +571,6 @@ int sound_loop(){
 
 		while ((pcmreturn = snd_pcm_readi(pcm_capture_handle, data_in, frames)) < 0){
 			snd_pcm_prepare(pcm_capture_handle);
-			// putchar('=');
 		}
         i = 0; 
         j = 0;
@@ -730,7 +731,7 @@ int loopback_loop(){
 		j = 0;
 		int ret_card = pcmreturn;
 
-		//fill up a local buffer, take only the left channel	
+		// fill up a local buffer, take only the left channel	
 		i = 0; 
 		j = 0;	
 		for (int i = 0; i < pcmreturn; i++){
@@ -769,11 +770,11 @@ void *sound_thread_function(void *ptr){
 	for (i = 0; i < 10; i++){
 		if (!sound_start_play(device))
 			break;
-			delay(1000); //wait for the sound system to bootup
+			delay(1000); // wait for the sound system to bootup
 			printf("Retrying the sound system %d\n", i);
 	}
 	if (i == 10){
-	 fprintf(stderr, "*Error opening play device");
+		fprintf(stderr, "*Error opening play device");
 		return NULL;
 	}
 

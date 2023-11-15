@@ -46,11 +46,11 @@ void init_gpio_pins(void) {
     // this requires wiringpi 2.61 (unoffical mods)
 	wiringPiSetup();
 
-    // const int8_t PINS_IN[] = {7, 0, 2, 3, 12, 13, 14, 21, -1};
-    // const int8_t PINS_OUT[] = {4, 5, 6, 10, 11, 27, -1};
+    const int8_t PINS_IN[] = {7, 0, 2, 3, 12, 13, 14, 21, -1};
+    const int8_t PINS_OUT[] = {4, 5, 6, 10, 11, 27, -1};
 
-    const int8_t PINS_IN[] = {ENC1_A, ENC1_B, ENC2_A, ENC2_B, -1};
-    const int8_t PINS_OUT[] = {-1};
+    // const int8_t PINS_IN[] = {ENC1_A, ENC1_B, ENC2_A, ENC2_B, -1};
+    // const int8_t PINS_OUT[] = {-1};
 
     int8_t *i = (int8_t *) PINS_IN;
     while (*i >= 0) {

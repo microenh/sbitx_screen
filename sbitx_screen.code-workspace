@@ -14,7 +14,8 @@
 			"string.h": "c",
 			"gmodule.h": "c",
 			"math.h": "c",
-			"sdr.h": "c"
+			"sdr.h": "c",
+			"settings.h": "c"
 		},
 		"cmake.generator": "Ninja"
 	}

@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "display.h"
 #include "sdr.h"
 #include "settings.h"
 
@@ -182,6 +183,7 @@ void rx_process(
 	int32_t *input_rx, int32_t *input_mic, 
 	int32_t *output_speaker, int32_t *output_tx, 
 	int n_samples) {
+
 	//STEP 1: first add the previous M samples to
     memcpy(fft_in_r, fft_m_r, (MAX_BINS/2) * sizeof(float));
 
@@ -249,7 +251,7 @@ void rx_process(
     fftwf_execute(r->plan_rev);
 
 	//STEP 8 : AGC
-	agc2(r);
+	// agc2(r);
 	
 	//STEP 9: send the output back to where it needs to go
 	int is_digital = 0;

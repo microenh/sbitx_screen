@@ -14,6 +14,8 @@
 static const gchar * const GLADE = "sbitx_screen.glade";
 static const gchar * const CSS = "main.css";
 
+bool update_hb_flag = false;
+
 typedef enum _offOn {
     o_off,
     o_on,
@@ -53,6 +55,7 @@ static GtkLabel
     *lbl_step,
     *lbl_tx,
     *lbl_vfo,
+    *lbl_heartbeat,
     *level[se_END],
     *vfo_frequency[v_END],
     *vfo_mode[v_END];
@@ -76,6 +79,10 @@ int heartbeat(gpointer data) {
         hb_ctr--;
     } else {
         hb_ctr = 8;
+        if (update_hb_flag) {
+            update_heartbeat();
+            update_hb_flag = false;
+        }
         
         char temp[40];
 
@@ -133,6 +140,7 @@ void init_display(int argc, char **argv) {
     lbl_step = GTK_LABEL(gtk_builder_get_object(builder, "lbl_step"));
     lbl_tx = GTK_LABEL(gtk_builder_get_object(builder, "lbl_rx_tx"));
     lbl_vfo = GTK_LABEL(gtk_builder_get_object(builder, "lbl_vfo"));
+    lbl_heartbeat = GTK_LABEL(gtk_builder_get_object(builder, "lbl_heartbeat"));
 
     ent_command = GTK_ENTRY(gtk_builder_get_object(builder, "ent_command"));
     GtkTextView *txv_console = GTK_TEXT_VIEW(gtk_builder_get_object(builder, "txv_console"));
@@ -166,14 +174,7 @@ void init_display(int argc, char **argv) {
 
 	gtk_widget_show(window);
 	gtk_window_fullscreen(GTK_WINDOW(window));
-
-    // char temp[20];
-    // sprintf(temp, "dwg width: %d", gtk_widget_get_allocated_width(GTK_WIDGET(dwg_panafall)));
-    // update_console(temp);
 }
-
-
-
 
 void update_date(char *text) {gtk_label_set_text(lbl_date, text);}
 
@@ -183,6 +184,12 @@ void update_step(Step step) {
         saved = step;
         gtk_label_set_text(lbl_step, steps[step]);
     }
+}
+
+void update_heartbeat(void) {
+    static bool state = false;
+    state = !state;
+    gtk_label_set_text(lbl_heartbeat, state ? "*" : "");
 }
 
 void update_span(Span span)

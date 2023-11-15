@@ -1,6 +1,7 @@
 #include <stdbool.h>
 
 #include "console.h"
+#include "display.h"
 #include "hardware.h"
 #include "queue.h"
 #include "radio_state.h"
@@ -35,15 +36,15 @@ void set_lpf_40mhz(int frequency){
     }
 	int lpf;
 
-	if (frequency < 5500000)
+	if (frequency < 5500000) {
 		lpf = LPF_D;
-	else if (frequency < 10500000)		
+    } else if (frequency < 10500000) {		
 		lpf = LPF_C;
-	else if (frequency < 18500000)		
+    } else if (frequency < 18500000) {		
 		lpf = LPF_B;
-	else // if (frequency < 30000000)
+    } else { // if (frequency < 30000000) 
 		lpf = LPF_A; 
-
+    }
 	if (lpf == prev_lpf){
 		return;
 	}
@@ -62,10 +63,6 @@ void hw_set_frequency(int frequency) {
     static int prev_freq = -1;
     if (frequency == prev_freq)
         return;
-    // GString *text = g_string_new(NULL);
-    // g_string_printf(text, "Freq: %d", frequency);
-    // update_console(text->str);
-    // g_string_free(text, true);    
 
     int freq_adj;
     switch (get_mode()) {
@@ -80,11 +77,17 @@ void hw_set_frequency(int frequency) {
             break;
     }
     int adj_frequency = frequency + freq_adj + BFO_FREQ - BFO_OFFSET + TUNING_SHIFT;
+
+    GString *text = g_string_new(NULL);
+    g_string_printf(text, "adj_freq: %d", adj_frequency);
+    update_console(text->str);
+    g_string_free(text, true);    
+
+
     si5351bx_setfreq(2, adj_frequency);
     set_lpf_40mhz(frequency);
     prev_freq = frequency;
 }
-
 
 
 void setup_audio_codec(){

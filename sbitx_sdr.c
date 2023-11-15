@@ -59,8 +59,6 @@ static void tx_process(
 
 }
 
-
-
 // This is called each time there is a block of signal samples ready 
 // either from the mic or from the rx IF 
 void sound_process(

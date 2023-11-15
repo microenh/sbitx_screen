@@ -7,6 +7,8 @@
 #include "texts.h"
 #include "settings.h"
 
+extern bool update_hb_flag;
+
 extern GtkEntry *ent_command;
 extern GtkTextBuffer *tb_console;
 
@@ -29,6 +31,8 @@ void update_record(bool on);
 void update_rit(bool on);
 void update_tx(bool tx);
 void update_tx_enable(bool enable);
+
+void update_heartbeat(void);
 
 // change colors
 void update_vfo_state(Vfo vfo, VfoState vfoState);
