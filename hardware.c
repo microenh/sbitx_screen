@@ -89,7 +89,6 @@ void hw_set_frequency(int frequency) {
     prev_freq = frequency;
 }
 
-
 void setup_audio_codec(){
     GString * const audio_card = g_string_new("hw:0");
 
