@@ -7,8 +7,6 @@
 #include "texts.h"
 #include "settings.h"
 
-extern bool update_hb_flag;
-
 extern GtkEntry *ent_command;
 extern GtkTextBuffer *tb_console;
 

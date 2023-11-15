@@ -36,6 +36,7 @@
 #include <ctype.h>
 #include <libgen.h>
 
+#include "debug.h"
 #include "display.h"
 #include "settings.h"
 #include "radio_state.h"
@@ -43,10 +44,12 @@
 
 int main(int argc, char *argv[]) {
 	init_display(argc, argv);
+	init_debugger();
 	init_radio();
 
 	gtk_main();
 	save_settings();
+	close_debugger();
 	close_radio();
 
 	return EXIT_SUCCESS;

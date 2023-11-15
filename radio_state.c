@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <gtk/gtk.h>
 
-#include "radio_state.h"
 #include "display.h"
+#include "radio_state.h"
 #include "hardware.h"
 
 static Radio radio;

@@ -1,7 +1,5 @@
 #include <stdbool.h>
 
-#include "console.h"
-#include "display.h"
 #include "hardware.h"
 #include "queue.h"
 #include "radio_state.h"

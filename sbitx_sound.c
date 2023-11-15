@@ -4,7 +4,6 @@
 #include <time.h>
 #include <wiringPi.h>
 
-#include "display.h"
 #include "queue.h"
 #include "sdr.h"
 #include "sound.h"

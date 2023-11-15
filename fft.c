@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "display.h"
 #include "sdr.h"
 #include "settings.h"
 

@@ -4,6 +4,7 @@
 #include <time.h>
 #include <gtk/gtk.h>
 
+#include "debug.h"
 #include "display.h"
 #include "radio_state.h"
 #include "settings.h"
@@ -14,7 +15,6 @@
 static const gchar * const GLADE = "sbitx_screen.glade";
 static const gchar * const CSS = "main.css";
 
-bool update_hb_flag = false;
 
 typedef enum _offOn {
     o_off,
