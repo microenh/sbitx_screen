@@ -6,6 +6,7 @@
 
 #include "debug.h"
 #include "display.h"
+#include "global_string.h"
 #include "radio_state.h"
 #include "settings.h"
 #include "rotary.h"
@@ -25,8 +26,6 @@ typedef enum _offOn {
 static void open_glade_and_css(GtkBuilder **builder, GtkCssProvider **css_provider) {
 	// look for glade and css files in either the current directory or the one above it
 	// i.e. if the file is in a build folder off the main directory
-    GString *temp = g_string_new(NULL);
-
 	FILE *f = fopen(GLADE, "r");
 	if (f) {
 		fclose(f);
@@ -34,12 +33,11 @@ static void open_glade_and_css(GtkBuilder **builder, GtkCssProvider **css_provid
 	} else {
         g_string_assign(prefix, "../%s");
 	}
-	g_string_printf(temp, prefix->str, GLADE);
-	*builder = gtk_builder_new_from_file(temp->str);
-	g_string_printf(temp, prefix->str, CSS);
+	g_string_printf(temp_string, prefix->str, GLADE);
+	*builder = gtk_builder_new_from_file(temp_string->str);
+	g_string_printf(temp_string, prefix->str, CSS);
 	*css_provider = gtk_css_provider_new();
-	gtk_css_provider_load_from_path(*css_provider, temp->str, NULL);
-    g_string_free(temp, true);
+	gtk_css_provider_load_from_path(*css_provider, temp_string->str, NULL);
 }
 
 static GtkWidget *window;
@@ -67,6 +65,7 @@ GtkEntry* ent_command;
 GtkTextBuffer *tb_console;
 static GtkDrawingArea* dwg_panafall;
 
+GString *temp;
 
 #define SUB_RESET 10
 
@@ -79,25 +78,15 @@ int heartbeat(gpointer data) {
         hb_ctr--;
     } else {
         hb_ctr = 8;
-        if (update_hb_flag) {
-            update_heartbeat();
-            update_hb_flag = false;
-        }
-
-        if (debug_text->len) {
-            update_console(debug_text->str);
-            g_string_truncate(debug_text, 0);
-        }
+        debug_check();
         
-        char temp[40];
-
         time_t t;   // not a primitive datatype
         time(&t);
 
         struct tm *pm;
         pm = gmtime(&t);
-        sprintf(temp, "%2d:%02d:%02d", pm->tm_hour, pm->tm_min, pm->tm_sec);
-        gtk_label_set_text(lbl_date, temp);
+        g_string_printf(temp_string, "%2d:%02d:%02d", pm->tm_hour, pm->tm_min, pm->tm_sec);
+        gtk_label_set_text(lbl_date, temp_string->str);
         if (sub_reset) {
             if (!--sub_reset) {
                 call_select_sub_encoder(se_af);
@@ -118,10 +107,9 @@ int heartbeat(gpointer data) {
 }
 
 
-void init_display(int argc, char **argv) {
+void display_init(int argc, char **argv) {
 	gtk_init(&argc, &argv); // init Gtk
-    prefix = g_string_new(NULL);
-
+\
     //---------------------------------------------------------------------
     // establish contact with xml code used to adjust widget settings
     //---------------------------------------------------------------------
@@ -181,6 +169,9 @@ void init_display(int argc, char **argv) {
 	gtk_window_fullscreen(GTK_WINDOW(window));
 }
 
+void display_close(void) {
+}
+
 void update_date(char *text) {gtk_label_set_text(lbl_date, text);}
 
 void update_step(Step step) {
@@ -191,10 +182,8 @@ void update_step(Step step) {
     }
 }
 
-void update_heartbeat(void) {
-    static bool state = false;
-    state = !state;
-    gtk_label_set_text(lbl_heartbeat, state ? "*" : "");
+void update_debug_heartbeat(const gchar * const text) {
+    gtk_label_set_text(lbl_heartbeat, text);
 }
 
 void update_span(Span span)

@@ -6,6 +6,7 @@
 
 #include "console.h"
 #include "display.h"
+#include "global_string.h"
 #include "radio_state.h"
 #include "settings.h"
 
@@ -167,10 +168,8 @@ static const gchar * const bad_good[] = {
 };
 
 static void console_feedback(const gchar * const param, const gchar * const data, bool good) {
-    GString *text = g_string_new(NULL);
-    g_string_printf(text, "%s%s: %s", bad_good[good], param, data);
-    update_console(text->str);
-    g_string_free(text, true);
+    g_string_printf(temp_string, "%s%s: %s", bad_good[good], param, data);
+    update_console(temp_string->str);
 }
 
 bool c_call(const gchar * const data) {
@@ -366,10 +365,8 @@ void parse_command(const GString * const command) {
     for (int i=0; dispatch[i].command; i++) {
         if (g_str_equal(command_token, dispatch[i].command)) {
             if (dispatch[i].callback(data_token)) {
-                GString *text = g_string_new(NULL);
-                g_string_printf(text, "%s: %s", command_token, data_token);
-                update_console(text->str);
-                g_string_free(text, true);    
+                g_string_printf(temp_string, "%s: %s", command_token, data_token);
+                update_console(temp_string->str);
             }
             break;
         }
@@ -377,8 +374,7 @@ void parse_command(const GString * const command) {
 }
 
 void do_console_entry() {
-    GString * const command = g_string_new(gtk_entry_get_text(ent_command));
+    g_string_assign(temp_string, gtk_entry_get_text(ent_command));
     gtk_entry_set_text(ent_command, "");
-    parse_command(command);
-    g_string_free(command, true);
+    parse_command(temp_string);
 }

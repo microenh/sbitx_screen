@@ -1,3 +1,4 @@
+#include <gtk/gtk.h>
 #include <stdbool.h>
 
 #include "debug.h"
@@ -9,9 +10,6 @@
 #include "sound.h"
 #include "wiringPi.h"
 
-void hw_set_tx(bool tx) {}
-
-struct Queue qremote;
 
 const int BFO_FREQ = 40035000;
 const int BFO_OFFSET = 24000;
@@ -22,6 +20,11 @@ const int LPF_B = 6;
 const int LPF_C = 10;
 const int LPF_D = 11;
 
+struct Queue qremote;
+
+static GString *audio_card;
+
+void hw_set_tx(bool tx) {}
 
 void set_lpf_40mhz(int frequency){
     static int prev_lpf = -1;
@@ -48,10 +51,8 @@ void set_lpf_40mhz(int frequency){
 		return;
 	}
 
-    // GString *text = g_string_new(NULL);
-    // g_string_printf(text, "LPF: Off %d, On %d", prev_lpf, lpf);
-    // update_console(text->str);
-    // g_string_free(text, true);    
+    // g_string_printf(temp_string, "LPF: Off %d, On %d", prev_lpf, lpf);
+    // update_console(temp_string->str);
     if (prev_lpf > -1)
         digitalWrite(prev_lpf, LOW);
 	digitalWrite(lpf, HIGH); 
@@ -77,16 +78,12 @@ void hw_set_frequency(int frequency) {
     }
     int adj_frequency = frequency + freq_adj + BFO_FREQ - BFO_OFFSET + TUNING_SHIFT;
 
-    // g_string_printf(debug_text, "adj_freq: %d", adj_frequency);
-
     si5351bx_setfreq(2, adj_frequency);
     set_lpf_40mhz(frequency);
     prev_freq = frequency;
 }
 
 void setup_audio_codec(){
-    GString * const audio_card = g_string_new("hw:0");
-
 	//configure all the channels of the mixer
 	sound_mixer(audio_card->str, "Input Mux", 0);
 	sound_mixer(audio_card->str, "Line", 1);
@@ -97,8 +94,6 @@ void setup_audio_codec(){
 	sound_mixer(audio_card->str, "Master", 10);
 	sound_mixer(audio_card->str, "Output Mixer HiFi", 1);
 	sound_mixer(audio_card->str, "Output Mixer Mic Sidetone", 0);
-
-    g_string_free(audio_card, true);
 }
 
 void setup_oscillators(){
@@ -115,7 +110,16 @@ void setup_oscillators(){
 	// si5351_reset();
 }
 
+void hw_set_af(int level) {
+    sound_mixer(audio_card->str, "Master", level);
+}
+
+void hw_set_if(int level) {
+    sound_mixer(audio_card->str, "Capture", level);    
+}
+
 void hw_init(void) {
+    audio_card = g_string_new("hw:0");
     fft_init();
     q_init(&qremote, 8000);
 
@@ -133,5 +137,6 @@ void hw_close(void) {
     for (int i=0; i<3; i++)
         si5351a_clkoff(i);
     set_lpf_40mhz(-1);
+    g_string_free(audio_card, true);
 }
 

@@ -184,7 +184,6 @@ void rx_process(
 	int32_t *output_speaker, int32_t *output_tx, 
 	int n_samples) {
 
-	// g_string_printf(debug_text, "samples %d", n_samples);
 	//STEP 1: first add the previous M samples to
     memcpy(fft_in_r, fft_m_r, (MAX_BINS/2) * sizeof(float));
 
@@ -268,7 +267,6 @@ void rx_process(
 		if (output_speaker[i] < fft_min)
 			fft_min = output_speaker[i];
 		}
-		g_string_printf(debug_text, "fft: %08x-%08x", fft_min, fft_max);
 
 		//push the samples to the remote audio queue, decimated to 16000 samples/sec
 		//for (int i=0; i<MAX_BINS/2; i+=6)

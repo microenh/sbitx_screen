@@ -2,6 +2,7 @@
 #include <gtk/gtk.h>
 
 #include "display.h"
+#include "global_string.h"
 #include "radio_state.h"
 #include "hardware.h"
 
@@ -41,7 +42,7 @@ static int adj_frequency(Vfo vfo){
     return frequency;
 }
 
-static void update_vfo_states(void) {
+static void vfo_states_update(void) {
     Vfo sel, unsel;
     VfoState selState, unselState;
     sel = radio.vfo;
@@ -58,7 +59,7 @@ static void update_vfo_states(void) {
     update_vfo_state(unsel, unselState);
 }
 
-static void update_display(void) {
+static void display_update(void) {
     update_agc(radio.vfoData[radio.vfo].agc);
     update_mode(radio.vfoData[radio.vfo].mode);
     update_span(radio.miscSettings.span);
@@ -77,7 +78,13 @@ static void update_display(void) {
         update_vfo_frequency(i, radio.vfoData[i].frequency);
         update_vfo_mode(i, radio.vfoData[i].mode);
     }
-    update_vfo_states();
+    vfo_states_update();
+}
+
+static void hardware_update(void) {
+    hw_set_frequency(adj_frequency(radio.vfo));
+    hw_set_af(radio.vfoData[radio.vfo].level[se_af]);
+    hw_set_if(radio.vfoData[radio.vfo].level[se_af]);
 }
 
 void do_band(Band band) {
@@ -119,32 +126,27 @@ void do_band(Band band) {
     radio.subEncoder = se_af;
     radio.tx = false;
     radio.record = false;
-    hw_set_frequency(adj_frequency(radio.vfo));
-    update_display();
+    display_update();
 }
 
 static void load_settings(void) {
-    GString *temp = g_string_new(NULL);
-    g_string_printf(temp, prefix->str, SETTINGS);
-    FILE *f = fopen(temp->str, "r");
+    g_string_printf(temp_string, prefix->str, SETTINGS);
+    FILE *f = fopen(temp_string->str, "r");
     if (f) {
         fread(&radio, sizeof(radio), 1, f);
         fclose(f);
     } else {
         initial_radio_settings(&radio);
     }
-    g_string_free(temp, true);
 }
 
 void save_settings(void) {
     radio.tx = false;
     radio.subEncoder = se_af;
-    GString *temp = g_string_new(NULL);
-    g_string_printf(temp, prefix->str, SETTINGS);
-    FILE *f = fopen(temp->str, "w");
+    g_string_printf(temp_string, prefix->str, SETTINGS);
+    FILE *f = fopen(temp_string->str, "w");
     fwrite(&radio, sizeof(radio), 1, f);
     fclose(f);
-    g_string_free(temp, true);
 }
 
 
@@ -154,14 +156,14 @@ static const int subEncoderInit[] = { 50,    0, 3000,  50,  200,  50,   600,    
 static const int subEncoderMax[]  = {100,  100, 4000, 100, 1000, 100,  1500,   100,  40};
 static const int subEncoderStep[] = {  1,    1,   50,   1,   50,   1,    10,     1,   1};
 
-void init_radio(void) {
+void radio_init(void) {
     hw_init();
     load_settings(); 
     hw_set_frequency(adj_frequency(radio.vfo));   
-    update_display();
+    display_update();
 }
 
-void close_radio(void) {
+void radio_close(void) {
     hw_close();
 }
 
@@ -212,7 +214,7 @@ void do_vfo(Vfo v) {
     if (radio.tx) return;
     radio.vfo = v;    
     update_vfo(radio.vfo);
-    update_vfo_states();
+    vfo_states_update();
 }
 
 void do_vfo_inc(void) {
@@ -257,7 +259,7 @@ void do_split(bool on) {
     if (radio.tx) return;
     radio.miscSettings.split = on;
     update_split(on);
-    update_vfo_states();
+    vfo_states_update();
 }
 
 void do_split_inc(void) {
@@ -277,7 +279,7 @@ void do_tx_inc(void) {
     if (!radio.tx_lock) {
         radio.tx = !radio.tx;
         update_tx(radio.tx);
-        update_vfo_states();
+        vfo_states_update();
         hw_set_tx(radio.tx);
     }
 }
@@ -305,6 +307,14 @@ void do_sub_encoder(SubEncoder rse, int i) {
         i = max;    
     radio.vfoData[radio.vfo].level[rse] = i;
     update_level(rse, i);
+    switch (rse) {
+        case se_af:
+            hw_set_af(i);
+            break;
+        case se_if:
+            hw_set_if(i);
+            break;
+    }
 }
 
 void do_sub_encoder_inc(int change) {
@@ -382,7 +392,7 @@ void set_tx_lock(const bool tx_lock) {
     if (tx_lock) {
         radio.tx = false;
         update_tx(radio.tx);
-        update_vfo_states();
+        vfo_states_update();
         hw_set_tx(radio.tx);
     }
     update_tx_enable(!tx_lock);

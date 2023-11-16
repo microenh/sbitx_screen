@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 #include "console.h"
+#include "debug.h"
 #include "radio_state.h"
 #include "sdr.h"
 
@@ -56,7 +57,6 @@ static void tx_process(
 	int32_t *input_rx, int32_t *input_mic, 
 	int32_t *output_speaker, int32_t *output_tx, 
 	int n_samples) {
-
 }
 
 // This is called each time there is a block of signal samples ready 
@@ -70,7 +70,6 @@ void sound_process(
 		tx_process(input_rx, input_mic, output_speaker, output_tx, n_samples);
 	else
 		rx_process(input_rx, input_mic, output_speaker, output_tx, n_samples);
-
 
 	// if (pf_record)
 	// 	wav_record(in_tx == 0 ? output_speaker : input_mic, n_samples);

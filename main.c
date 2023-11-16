@@ -38,19 +38,23 @@
 
 #include "debug.h"
 #include "display.h"
+#include "global_string.h"
 #include "settings.h"
 #include "radio_state.h"
 
 
 int main(int argc, char *argv[]) {
-	init_display(argc, argv);
-	init_debugger();
-	init_radio();
+	global_string_init();
+	debug_init();
+	display_init(argc, argv);
+	radio_init();
 
 	gtk_main();
 	save_settings();
-	close_debugger();
-	close_radio();
+	radio_close();
+	display_close();
+	debug_close();
+	global_string_close();
 
 	return EXIT_SUCCESS;
 }

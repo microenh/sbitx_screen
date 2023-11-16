@@ -10,7 +10,8 @@
 extern GtkEntry *ent_command;
 extern GtkTextBuffer *tb_console;
 
-void init_display(int argc, char **argv);
+void display_init(int argc, char **argv);
+void display_close(void);
 
 void update_date(char *text);
 void update_level(SubEncoder item, int value);
@@ -30,7 +31,7 @@ void update_rit(bool on);
 void update_tx(bool tx);
 void update_tx_enable(bool enable);
 
-void update_heartbeat(void);
+void update_debug_heartbeat(const gchar * const text);
 
 // change colors
 void update_vfo_state(Vfo vfo, VfoState vfoState);

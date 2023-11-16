@@ -47,8 +47,8 @@ typedef struct _radio {
     BandStack bandStack[b_END];   
 } Radio;
 
-void init_radio(void);
-void close_radio(void);
+void radio_init(void);
+void radio_close(void);
 void initial_radio_settings(Radio *radio);
 
 void select_sub_encoder(SubEncoder item);

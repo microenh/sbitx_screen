@@ -1,10 +1,15 @@
 #pragma once
 
-#include <stdbool.h>
 #include <gtk/gtk.h>
+#include <stdbool.h>
 
-extern bool update_hb_flag;
-extern GString *debug_text;
+void debug_init(void);
+void debug_close(void);
 
-void init_debugger(void);
-void close_debugger(void);
+// can be called by other threads
+void debug_heartbeat(void);
+void debug_text(const gchar * const text);
+void debug_printf(const char *fmt, ...);
+
+// use only by display.c
+void debug_check(void);
