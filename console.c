@@ -7,6 +7,7 @@
 #include "console.h"
 #include "display.h"
 #include "global_string.h"
+#include "hardware.h"
 #include "radio_state.h"
 #include "settings.h"
 
@@ -288,6 +289,14 @@ static bool c_subEncoder(const SubEncoder rse, const gchar * const data) {
     return true;
 }
 
+static bool c_filter(const gchar * const data) {
+    if (data) {
+        int pin;
+        upper_case(data);
+        hw_set_filter(data[0]);
+    }
+}
+
 // bool c_af(const gchar * const data) {return c_subEncoder(se_af, data);}
 // bool c_comp(const gchar * const data) {return c_subEncoder(se_comp, data);}
 // bool c_high(const gchar * const data) {return c_subEncoder(se_high, data);}
@@ -319,6 +328,7 @@ static const struct _dispatch const dispatch[] = {
     {"SPLIT", c_split},
     {"REC", c_record},
     {"AGC", c_agc},
+    {"FILTER", c_filter},
     // {"AF", c_af},
     // {"COMP", c_comp}.
     // {"HIGH", c_high},

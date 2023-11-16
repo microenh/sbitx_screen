@@ -5,6 +5,7 @@
 #include "hardware.h"
 #include "queue.h"
 #include "radio_state.h"
+#include "rotary.h"
 #include "sdr.h"
 #include "si5351.h"
 #include "sound.h"
@@ -26,16 +27,46 @@ static GString *audio_card;
 
 void hw_set_tx(bool tx) {}
 
-void set_lpf_40mhz(int frequency){
-    static int prev_lpf = -1;
-    if (frequency == -1) {
-        digitalWrite(LPF_A, LOW);
-        digitalWrite(LPF_B, LOW);
-        digitalWrite(LPF_C, LOW);
-        digitalWrite(LPF_D, LOW);
-        prev_lpf = -1;
-        return;
+static void hw_filters_off(void) {
+    digitalWrite(LPF_A, LOW);
+    digitalWrite(LPF_B, LOW);
+    digitalWrite(LPF_C, LOW);
+    digitalWrite(LPF_D, LOW);
+}
+
+static void hw_set_filter_pin(int pin) {
+    static int prev_pin = -1;
+    if (pin != prev_pin) {
+        if (prev_pin > -1)
+            digitalWrite(prev_pin, LOW);
+        digitalWrite(pin, HIGH);
     }
+    prev_pin = pin;
+}
+
+void hw_set_filter(gchar filter) {
+    int pin = -1;
+    switch(filter) {
+        case 'A':
+            pin = LPF_A;
+            break;
+        case 'B':
+            pin = LPF_B;
+            break;
+        case 'C':
+            pin = LPF_C;
+            break;
+        case 'D':
+            pin = LPF_D;
+            break;
+    }
+    if (pin > -1)
+        hw_set_filter_pin(pin); 
+
+}
+
+
+void set_lpf_40mhz(int frequency){
 	int lpf;
 
 	if (frequency < 5500000) {
@@ -47,17 +78,10 @@ void set_lpf_40mhz(int frequency){
     } else { // if (frequency < 30000000) 
 		lpf = LPF_A; 
     }
-	if (lpf == prev_lpf){
-		return;
-	}
-
-    // g_string_printf(temp_string, "LPF: Off %d, On %d", prev_lpf, lpf);
-    // update_console(temp_string->str);
-    if (prev_lpf > -1)
-        digitalWrite(prev_lpf, LOW);
-	digitalWrite(lpf, HIGH); 
-	prev_lpf = lpf;
+    hw_set_filter_pin(lpf);
 }
+
+
 
 void hw_set_frequency(int frequency) {
     static int prev_freq = -1;
@@ -118,7 +142,37 @@ void hw_set_if(int level) {
     sound_mixer(audio_card->str, "Capture", level);    
 }
 
+static void init_gpio_pins(void) {
+    // this requires wiringpi 2.61 (unoffical mods)
+	wiringPiSetup();
+
+    const int8_t PINS_IN[] = {7, 0, 2, 3, 12, 13, 14, 21, -1};
+    const int8_t PINS_OUT[] = {4, 5, 6, 10, 11, 27, -1};
+
+    // const int8_t PINS_IN[] = {ENC1_A, ENC1_B, ENC2_A, ENC2_B, -1};
+    // const int8_t PINS_OUT[] = {-1};
+
+    int8_t *i = (int8_t *) PINS_IN;
+    while (*i >= 0) {
+        pinMode(*i, INPUT);
+        pullUpDnControl(*i, PUD_UP);
+        i++;
+    }
+
+    i = (uint8_t *) PINS_OUT;
+    while (*i >= 0) {
+        pinMode(*i, OUTPUT);
+        digitalWrite(*i, LOW);
+        i++;
+    }
+	wiringPiISR(ENC1_A, INT_EDGE_BOTH, level_isr);
+	wiringPiISR(ENC2_A, INT_EDGE_BOTH, tuning_isr);
+}
+
+
 void hw_init(void) {
+    init_gpio_pins();
+    hw_filters_off();
     audio_card = g_string_new("hw:0");
     fft_init();
     q_init(&qremote, 8000);
@@ -136,7 +190,7 @@ void hw_close(void) {
     hw_set_tx(false);
     for (int i=0; i<3; i++)
         si5351a_clkoff(i);
-    set_lpf_40mhz(-1);
+    hw_filters_off();
     g_string_free(audio_card, true);
 }
 

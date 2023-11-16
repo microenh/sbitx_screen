@@ -159,7 +159,6 @@ void display_init(int argc, char **argv) {
 
     btn_tx = GTK_BUTTON(gtk_builder_get_object(builder, "btn_tx"));
 
-    init_gpio_pins();
     g_timeout_add(125, heartbeat, NULL);
 
 	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
