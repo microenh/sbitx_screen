@@ -109,7 +109,7 @@ int heartbeat(gpointer data) {
 
 void display_init(int argc, char **argv) {
 	gtk_init(&argc, &argv); // init Gtk
-\
+
     //---------------------------------------------------------------------
     // establish contact with xml code used to adjust widget settings
     //---------------------------------------------------------------------

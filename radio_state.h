@@ -87,10 +87,13 @@ void set_callsign(const gchar * const callsign);
 const gchar * const get_grid(void);
 void set_grid(const gchar * const grid);
 
-const bool get_tx_lock(void);
+bool get_tx_lock(void);
 void set_tx_lock(const bool tx_lock);
 
-const Mode get_mode(void);
-const int get_rx_pitch(void);
+Mode get_mode(void);
+int get_rx_pitch(void);
 
-const bool in_tx(void);
+bool in_tx(void);
+
+int get_low(void);
+int get_high(void);

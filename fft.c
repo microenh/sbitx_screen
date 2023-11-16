@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "debug.h"
+#include "radio_state.h"
 #include "sdr.h"
 #include "settings.h"
 
@@ -284,17 +285,18 @@ void rx_process(
 }
 
 void set_rx_filter() {
-	if(rx_list->mode == m_lsb || rx_list->mode == m_cwr) {
+	Mode mode = get_mode();
+	if (mode == m_lsb || mode == m_cwr) {
         // puts("LSB");
 		filter_tune(rx_list->filter, 
-			(1.0 * -rx_list->high_hz) / RX_SAMPLE_RATE, 
-			(1.0 * -rx_list->low_hz) / RX_SAMPLE_RATE, 
+			(1.0 * -get_high()) / RX_SAMPLE_RATE, 
+			(1.0 * -get_low()) / RX_SAMPLE_RATE, 
 			5);
     } else {
         // puts("USB");
 		filter_tune(rx_list->filter, 
-			(1.0 * rx_list->low_hz) / RX_SAMPLE_RATE, 
-			(1.0 * rx_list->high_hz) / RX_SAMPLE_RATE, 
+			(1.0 * get_low()) / RX_SAMPLE_RATE, 
+			(1.0 * get_high()) / RX_SAMPLE_RATE, 
 			5);
     }
     #if 0

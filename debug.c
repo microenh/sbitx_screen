@@ -3,8 +3,11 @@
 #include "console.h"
 #include "display.h"
 #include "debug.h"
+#include "global_string.h"
 
 bool update_hb_flag = false;
+
+const int MAX_LINE = 25;
 
 static GString *d_text;
 
@@ -27,8 +30,12 @@ void debug_heartbeat(void) {
 void debug_printf(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
-    g_string_vprintf(d_text, fmt, args);
+    g_string_vprintf(temp_string, fmt, args);
     va_end(args);
+    g_string_truncate(temp_string, MAX_LINE);
+    if (d_text->len)
+        g_string_append(d_text, "\r\n");
+    g_string_append(d_text, temp_string->str);
 }
 
 // use only by display.c

@@ -7,3 +7,4 @@ void hw_set_tx(bool tx);
 void hw_set_af(int level);
 void hw_set_if(int level);
 void hw_set_filter(gchar filter);
+void hw_set_mode(void);

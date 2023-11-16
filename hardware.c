@@ -11,8 +11,13 @@
 #include "sound.h"
 #include "wiringPi.h"
 
+#define LO_USB 40035000
+#define LO_LSB 39987000
 
-const int BFO_FREQ = 40035000;
+
+const int BFO_FREQ = LO_LSB;
+
+
 const int BFO_OFFSET = 24000;
 const int TUNING_SHIFT = 0;
 
@@ -194,3 +199,9 @@ void hw_close(void) {
     g_string_free(audio_card, true);
 }
 
+void hw_set_mode() {
+	Mode mode = get_mode();
+    int new_bfo = (mode == m_lsb || mode == m_cwr) ? LO_LSB : LO_USB;
+    // debug_printf("LO: %d", new_bfo);
+    si5351bx_setfreq(1, new_bfo);
+}

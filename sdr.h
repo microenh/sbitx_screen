@@ -122,6 +122,7 @@ void rx_process(
 	int32_t *input_rx, int32_t *input_mic, 
 	int32_t *output_speaker, int32_t *output_tx, 
 	int n_samples);
+void set_rx_filter();
 
 // sbitc_sdr.c
 struct rx {

@@ -31,8 +31,7 @@
             <child>
               <object class="GtkTextView" id="txv_console">
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
-                <property name="can-focus">True</property>
+                <property name="can-focus">False</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
                 <property name="editable">False</property>
@@ -86,8 +85,8 @@
                 <child>
                   <object class="GtkButton" id="btn_step">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="receives-default">False</property>
                     <signal name="clicked" handler="btn_step_clicked_cb" swapped="no"/>
                     <child>
                       <object class="GtkBox">

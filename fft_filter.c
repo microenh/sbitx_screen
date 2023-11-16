@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#include "debug.h"
 #include "sdr.h"
 
 // Modified Bessel function of the 0th kind, used by the Kaiser window
@@ -129,9 +130,11 @@ int filter_tune(struct filter *f, float const low, float const high,
         m_high = temp;
     }
 
+    // debug_printf("filter: %0.4f-%0.4f", m_low, m_high);
+
     float gain = 1.0/((float)f->N);
-	// printf("# Gain is %lf\n", gain);
-	// printf("# filter elements %d\n", f->N);
+	// debug_printf("# Gain is %lf", gain);
+	// debug_printf("# filter elements %d", f->N);
 
     for(int n = 0; n < f->N; n++){
         float s = (float)(n) / f->N;
@@ -140,17 +143,17 @@ int filter_tune(struct filter *f, float const low, float const high,
             f->fir_coeff[n] = gain;
         else
             f->fir_coeff[n] = 0;
-        // printf("#1 %d  %g  %g %g before windowing: %g,%g\n", n, s, low, high, creal(f->fir_coeff[n]), cimag(f->fir_coeff[n]));
+        // debug_printf("#1 %d  %g  %g %g before windowing: %g,%g", n, s, low, high, creal(f->fir_coeff[n]), cimag(f->fir_coeff[n]));
     }
 
     window_filter(f, kaiser_beta);
 
-    FILE *out;
-    out = fopen("filter_data.csv","w");
-    fprintf(out, "id,real,imag\r\n");
-    for (int i=0; i<f->N; i++)
-        fprintf(out, "%d,%f,%f\r\n", i, __real__ f->fir_coeff[i], __imag__ f->fir_coeff[i]);
-    fclose(out);
+    // FILE *out;
+    // out = fopen("filter_data.csv","w");
+    // fprintf(out, "id,real,imag\r\n");
+    // for (int i=0; i<f->N; i++)
+    //     fprintf(out, "%d,%f,%f\r\n", i, __real__ f->fir_coeff[i], __imag__ f->fir_coeff[i]);
+    // fclose(out);
 
     return 0;
 }

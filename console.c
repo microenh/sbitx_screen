@@ -9,6 +9,7 @@
 #include "global_string.h"
 #include "hardware.h"
 #include "radio_state.h"
+#include "sdr.h"
 #include "settings.h"
 
 const int CONSOLE_LINES = 21;
@@ -18,7 +19,7 @@ void update_console(const gchar * const text) {
     gtk_text_buffer_get_end_iter(tb_console, &iter);
     gtk_text_buffer_insert(tb_console, &iter, text, -1);
     gtk_text_buffer_insert(tb_console, &iter, "\r\n", 1);
-    if (gtk_text_buffer_get_line_count(tb_console) > CONSOLE_LINES) {
+    while (gtk_text_buffer_get_line_count(tb_console) > CONSOLE_LINES) {
         GtkTextIter iter1;
         gtk_text_buffer_get_start_iter(tb_console, &iter);
         gtk_text_buffer_get_iter_at_line(tb_console, &iter1, 1);
@@ -289,13 +290,16 @@ static bool c_subEncoder(const SubEncoder rse, const gchar * const data) {
     return true;
 }
 
-static bool c_filter(const gchar * const data) {
+static bool c_filter_relay(const gchar * const data) {
     if (data) {
-        int pin;
         upper_case(data);
         hw_set_filter(data[0]);
     }
 }
+
+static bool c_filter(const gchar * const data) {
+    set_rx_filter();
+} 
 
 // bool c_af(const gchar * const data) {return c_subEncoder(se_af, data);}
 // bool c_comp(const gchar * const data) {return c_subEncoder(se_comp, data);}

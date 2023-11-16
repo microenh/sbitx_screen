@@ -1,10 +1,12 @@
-#include <stdio.h>
 #include <gtk/gtk.h>
+#include <stdio.h>
 
+#include "debug.h"
 #include "display.h"
 #include "global_string.h"
-#include "radio_state.h"
 #include "hardware.h"
+#include "radio_state.h"
+#include "sdr.h"
 
 static Radio radio;
 
@@ -186,6 +188,7 @@ void do_mode(Mode m) {
     radio.vfoData[radio.vfo].mode = m;
     update_mode(m);
     update_vfo_mode(radio.vfo, m);
+    hw_set_mode();
 }
 
 void do_mode_inc(void) {
@@ -226,6 +229,7 @@ void do_vfo_inc(void) {
 }
 
 void do_step(Step step) {
+    // debug_printf("step = %d, %d", step, step_values[step]);
     radio.miscSettings.step = step;
     update_step(step);
     adj = radio.vfoData[radio.vfo].frequency % step_values[step];
@@ -314,6 +318,10 @@ void do_sub_encoder(SubEncoder rse, int i) {
         case se_if:
             hw_set_if(i);
             break;
+        case se_low:
+        case se_high:
+            set_rx_filter();
+            break;
     }
 }
 
@@ -352,6 +360,7 @@ void do_main_encoder(int change) {
             rit = RIT_MAX;
         radio.miscSettings.rit_value = rit;
     } else {
+        // debug_printf("step: %d, %d", radio.miscSettings.step, step_values[radio.miscSettings.step]);
         int frequency = radio.vfoData[radio.vfo].frequency - adj + step_values[radio.miscSettings.step] * change;
         adj = 0;
         if (frequency < FREQ_MIN)
@@ -384,7 +393,7 @@ void set_grid(const gchar * const grid) {
     strcpy(radio.grid, grid);
 }
 
-const bool get_tx_lock(void) {
+bool get_tx_lock(void) {
     return radio.tx_lock;
 }
 
@@ -399,14 +408,22 @@ void set_tx_lock(const bool tx_lock) {
     radio.tx_lock = tx_lock;
 }
 
-const Mode get_mode(void) {
+bool in_tx(void) {
+    return radio.tx;
+}
+
+Mode get_mode(void) {
     return radio.vfoData[radio.vfo].mode;
 }
 
-const int get_rx_pitch(void) {
+int get_rx_pitch(void) {
     return radio.vfoData[radio.vfo].level[se_pitch];
 }
 
-const bool in_tx(void) {
-    return radio.tx;
+int get_low(void) {
+    return radio.vfoData[radio.vfo].level[se_low];
+}
+
+int get_high(void) {
+    return radio.vfoData[radio.vfo].level[se_high];
 }
