@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "debug.h"
 #include "sdr.h"
 #include "settings.h"
 
@@ -183,6 +184,7 @@ void rx_process(
 	int32_t *output_speaker, int32_t *output_tx, 
 	int n_samples) {
 
+	// g_string_printf(debug_text, "samples %d", n_samples);
 	//STEP 1: first add the previous M samples to
     memcpy(fft_in_r, fft_m_r, (MAX_BINS/2) * sizeof(float));
 
@@ -194,8 +196,9 @@ void rx_process(
 	// i is the index into the time samples, picking from 
 	// the samples added in the previous step
 	// gather the samples into a time domain array 
-	for (int i=MAX_BINS/2, j=0; i < MAX_BINS; i++, j++)
+	for (int i=MAX_BINS/2, j=0; i < MAX_BINS; i++, j++) {
         fft_in_r[i] = fft_m_r[j] = input_rx[j] * 5e-09;
+	}
 
 	//STEP 3: convert the time domain samples to  frequency domain
 	struct rx *r = rx_list;
@@ -250,15 +253,22 @@ void rx_process(
     fftwf_execute(r->plan_rev);
 
 	//STEP 8 : AGC
-	// agc2(r);
+	agc2(r);
 	
 	//STEP 9: send the output back to where it needs to go
 	int is_digital = 0;
+	int fft_max = 0;
+	int fft_min = 0x7fffffff;
 	if (rx_list->output == 0){
 		for (int i=0, j=MAX_BINS/2; j<MAX_BINS; i++, j++){
 			output_speaker[i] = (int) r->fft_time[j];
 			output_tx[i] = 0;
+		if (output_speaker[i] > fft_max)
+			fft_max = output_speaker[i];
+		if (output_speaker[i] < fft_min)
+			fft_min = output_speaker[i];
 		}
+		g_string_printf(debug_text, "fft: %08x-%08x", fft_min, fft_max);
 
 		//push the samples to the remote audio queue, decimated to 16000 samples/sec
 		//for (int i=0; i<MAX_BINS/2; i+=6)

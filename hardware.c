@@ -1,5 +1,6 @@
 #include <stdbool.h>
 
+#include "debug.h"
 #include "hardware.h"
 #include "queue.h"
 #include "radio_state.h"
@@ -76,11 +77,7 @@ void hw_set_frequency(int frequency) {
     }
     int adj_frequency = frequency + freq_adj + BFO_FREQ - BFO_OFFSET + TUNING_SHIFT;
 
-    GString *text = g_string_new(NULL);
-    g_string_printf(text, "adj_freq: %d", adj_frequency);
-    update_console(text->str);
-    g_string_free(text, true);    
-
+    // g_string_printf(debug_text, "adj_freq: %d", adj_frequency);
 
     si5351bx_setfreq(2, adj_frequency);
     set_lpf_40mhz(frequency);

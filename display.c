@@ -83,6 +83,11 @@ int heartbeat(gpointer data) {
             update_heartbeat();
             update_hb_flag = false;
         }
+
+        if (debug_text->len) {
+            update_console(debug_text->str);
+            g_string_truncate(debug_text, 0);
+        }
         
         char temp[40];
 
