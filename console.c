@@ -333,6 +333,7 @@ static const struct _dispatch const dispatch[] = {
     {"REC", c_record},
     {"AGC", c_agc},
     {"FILTER", c_filter},
+    {"FRELAY", c_filter_relay},
     // {"AF", c_af},
     // {"COMP", c_comp}.
     // {"HIGH", c_high},

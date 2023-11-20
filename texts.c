@@ -32,8 +32,8 @@ const char * const modes[] = {
     "USB",
     "CWR",
     "CW",
-    "DT",
-    "DTR"
+    "DTR",
+    "DT"
 };
 
 const char * const agcs[] = {

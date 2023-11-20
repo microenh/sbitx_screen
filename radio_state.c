@@ -86,7 +86,7 @@ static void display_update(void) {
 static void hardware_update(void) {
     hw_set_frequency(adj_frequency(radio.vfo));
     hw_set_af(radio.vfoData[radio.vfo].level[se_af]);
-    hw_set_if(radio.vfoData[radio.vfo].level[se_af]);
+    hw_set_if(radio.vfoData[radio.vfo].level[se_if]);
 }
 
 void do_band(Band band) {
@@ -129,6 +129,7 @@ void do_band(Band band) {
     radio.tx = false;
     radio.record = false;
     display_update();
+    hardware_update();
 }
 
 static void load_settings(void) {
@@ -161,7 +162,7 @@ static const int subEncoderStep[] = {  1,    1,   50,   1,   50,   1,    10,    
 void radio_init(void) {
     hw_init();
     load_settings(); 
-    hw_set_frequency(adj_frequency(radio.vfo));   
+    hardware_update();
     display_update();
 }
 

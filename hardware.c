@@ -15,7 +15,7 @@
 #define LO_LSB 39987000
 
 
-const int BFO_FREQ = LO_LSB;
+const int BFO_FREQ = LO_USB;
 
 
 const int BFO_OFFSET = 24000;
@@ -95,17 +95,29 @@ void hw_set_frequency(int frequency) {
 
     int freq_adj;
     switch (get_mode()) {
+        case m_lsb:
+            freq_adj = 0;
+            break;
+        case m_usb:
+            freq_adj = 0;
+            break;
         case m_cw:
             freq_adj = -get_rx_pitch();
             break;
         case m_cwr:
             freq_adj = get_rx_pitch();
             break;
-        default:
+        case m_datar:
+            freq_adj = 0;
+            break;
+        case m_data:
             freq_adj = 0;
             break;
     }
     int adj_frequency = frequency + freq_adj + BFO_FREQ - BFO_OFFSET + TUNING_SHIFT;
+
+    // debug_printf("adj_frequency: %d", adj_frequency);
+
 
     si5351bx_setfreq(2, adj_frequency);
     set_lpf_40mhz(frequency);
@@ -201,7 +213,7 @@ void hw_close(void) {
 
 void hw_set_mode() {
 	Mode mode = get_mode();
-    int new_bfo = (mode == m_lsb || mode == m_cwr) ? LO_LSB : LO_USB;
-    // debug_printf("LO: %d", new_bfo);
+    int new_bfo = (mode == m_lsb || mode == m_cwr || mode == m_datar) ? LO_LSB : LO_USB;
+//    debug_printf("LO: %d", new_bfo);
     si5351bx_setfreq(1, new_bfo);
 }

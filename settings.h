@@ -25,8 +25,8 @@ typedef enum _mode {
     m_usb,
     m_cwr,
     m_cw,
-    m_data,
     m_datar,
+    m_data,
     m_END
 } Mode;
 
