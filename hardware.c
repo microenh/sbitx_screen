@@ -1,5 +1,8 @@
 #include <gtk/gtk.h>
 #include <stdbool.h>
+#ifndef NO_HARDWARE
+#include <wiringPi.h>
+#endif
 
 #include "debug.h"
 #include "hardware.h"
@@ -9,7 +12,9 @@
 #include "sdr.h"
 #include "si5351.h"
 #include "sound.h"
+#ifdef NO_HARDWARE
 #include "wiringPi.h"
+#endif
 
 #define LO_USB 40035000
 #define LO_LSB 39987000
@@ -126,6 +131,7 @@ void hw_set_frequency(int frequency) {
 
 void setup_audio_codec(){
 	//configure all the channels of the mixer
+    #ifndef NO_HARDWARE
 	sound_mixer(audio_card->str, "Input Mux", 0);
 	sound_mixer(audio_card->str, "Line", 1);
 	sound_mixer(audio_card->str, "Mic", 0);
@@ -135,6 +141,7 @@ void setup_audio_codec(){
 	sound_mixer(audio_card->str, "Master", 10);
 	sound_mixer(audio_card->str, "Output Mixer HiFi", 1);
 	sound_mixer(audio_card->str, "Output Mixer Mic Sidetone", 0);
+    #endif
 }
 
 void setup_oscillators(){
@@ -152,11 +159,15 @@ void setup_oscillators(){
 }
 
 void hw_set_af(int level) {
+    #ifndef NO_HARDWARE
     sound_mixer(audio_card->str, "Master", level);
+    #endif
 }
 
 void hw_set_if(int level) {
-    sound_mixer(audio_card->str, "Capture", level);    
+    #ifndef NO_HARDWARE
+    sound_mixer(audio_card->str, "Capture", level); 
+    #endif   
 }
 
 static void init_gpio_pins(void) {
@@ -200,7 +211,9 @@ void hw_init(void) {
     si5351bx_init();
     setup_oscillators();
     setup_audio_codec();
+    #ifndef NO_HARDWARE
     sound_thread_start("plughw:0,0");
+    #endif
 }
 
 void hw_close(void) {

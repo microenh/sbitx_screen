@@ -1,7 +1,12 @@
 #include <stdint.h>
+#ifndef NO_HARDWARE
 #include <wiringPi.h>
+#endif
 
 #include "rotary.h"
+#ifdef NO_HARDWARE
+#include "wiringPi.h"
+#endif
 
 Rotary
     rotary_sub = {.pin_a_no = ENC1_A, .pin_b_no = ENC1_B},

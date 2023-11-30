@@ -1,3 +1,4 @@
+#ifndef NO_HARDWARE
 #include <alsa/asoundlib.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -846,4 +847,4 @@ void sound_input(int loop) {
 // 	sound_thread_stop();
 // 	sleep(10);
 // }
-
+#endif

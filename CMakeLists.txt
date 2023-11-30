@@ -13,17 +13,18 @@ link_directories(${GTK3_LIBRARY_DIRS})
 
 # Add other flags to the compiler
 add_definitions(${GTK3_CFLAGS_OTHER})
+add_definitions("-D NO_HARDWARE")
 
 FILE(GLOB sources *.c)
 add_executable(sbitx_screen ${sources})
 
 target_link_libraries(sbitx_screen
   ${GTK3_LIBRARIES}
-  asound
+  # asound
   fftw3f
   m
   pthread
-  wiringPi
+  # wiringPi
   )
 
 include(CTest)

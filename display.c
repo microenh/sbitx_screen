@@ -16,6 +16,38 @@
 static const gchar * const GLADE = "sbitx_screen.glade";
 static const gchar * const CSS = "main.css";
 
+G_MODULE_EXPORT void btn_quit_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_minimize_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_high_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_low_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_af_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_if_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_pitch_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_wpm_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_comp_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_mic_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_power_clicked_cb(GtkButton *b);
+
+G_MODULE_EXPORT void btn_10m_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_12m_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_15m_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_17m_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_20m_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_30m_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_40m_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_80m_clicked_cb(GtkButton *b);
+
+G_MODULE_EXPORT void btn_agc_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_mode_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_split_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_record_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_rx_tx_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_rit_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_span_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_vfo_clicked_cb(GtkButton *b);
+G_MODULE_EXPORT void btn_step_clicked_cb(GtkButton *b);
+
+G_MODULE_EXPORT void ent_command_activate_cb(GtkEntry *e);
 
 typedef enum _offOn {
     o_off,
@@ -165,7 +197,9 @@ void display_init(int argc, char **argv) {
     gtk_builder_connect_signals(builder, NULL);
 
 	gtk_widget_show(window);
+    #ifndef NO_HARDWARE
 	gtk_window_fullscreen(GTK_WINDOW(window));
+    #endif
 }
 
 void display_close(void) {
