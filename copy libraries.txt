@@ -1,0 +1,5 @@
+ copy needed libraries
+ in ming264 shell, type
+ 
+ 
+ ldd <name>.exe | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" .
