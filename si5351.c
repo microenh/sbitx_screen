@@ -1,7 +1,9 @@
 #include <stdio.h>
-#include <linux/types.h>
+// #include <linux/types.h>
 #include <stdint.h>
-#include <wiringPi.h>
+// #include <wiringPi.h>
+
+#include "wiringPi.h"
 #include "i2cbb.h"
 #include "si5351.h"
 
@@ -56,10 +58,10 @@ static int i2c_error_count = 0;       // counts I2C Errors
 // }
 
 void i2cSendRegister(uint8_t reg, uint8_t val) { 
-    while (i2cbb_write_byte_data(SI5351_ADDR, reg, val) < 0) {
-        printf("Repeating I2C #%d\n", ++i2c_error_count);  // reports number of I2C repeats caused by errors
-        delay(1);
-    }
+    // while (i2cbb_write_byte_data(SI5351_ADDR, reg, val) < 0) {
+    //     printf("Repeating I2C #%d\n", ++i2c_error_count);  // reports number of I2C repeats caused by errors
+    //     delay(1);
+    // }
 }
 
 void si5351_reset() {

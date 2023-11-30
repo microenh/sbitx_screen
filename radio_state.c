@@ -14,7 +14,7 @@ static int adj;  // change to adjust frequency display mod step
 
 static const gchar * const SETTINGS = "settings.dat";
 
-GString *prefix;
+// GString *prefix;
 
 static Band get_band(void) {
     int f = radio.vfoData[radio.vfo].frequency;

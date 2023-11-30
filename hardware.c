@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include <stdbool.h>
+// #include <wiringPi.h>
 
 #include "debug.h"
 #include "hardware.h"
@@ -126,15 +127,15 @@ void hw_set_frequency(int frequency) {
 
 void setup_audio_codec(){
 	//configure all the channels of the mixer
-	sound_mixer(audio_card->str, "Input Mux", 0);
-	sound_mixer(audio_card->str, "Line", 1);
-	sound_mixer(audio_card->str, "Mic", 0);
-	sound_mixer(audio_card->str, "Mic Boost", 0);
-	sound_mixer(audio_card->str, "Playback Deemphasis", 0);
+	// sound_mixer(audio_card->str, "Input Mux", 0);
+	// sound_mixer(audio_card->str, "Line", 1);
+	// sound_mixer(audio_card->str, "Mic", 0);
+	// sound_mixer(audio_card->str, "Mic Boost", 0);
+	// sound_mixer(audio_card->str, "Playback Deemphasis", 0);
  
-	sound_mixer(audio_card->str, "Master", 10);
-	sound_mixer(audio_card->str, "Output Mixer HiFi", 1);
-	sound_mixer(audio_card->str, "Output Mixer Mic Sidetone", 0);
+	// sound_mixer(audio_card->str, "Master", 10);
+	// sound_mixer(audio_card->str, "Output Mixer HiFi", 1);
+	// sound_mixer(audio_card->str, "Output Mixer Mic Sidetone", 0);
 }
 
 void setup_oscillators(){
@@ -152,11 +153,11 @@ void setup_oscillators(){
 }
 
 void hw_set_af(int level) {
-    sound_mixer(audio_card->str, "Master", level);
+    // sound_mixer(audio_card->str, "Master", level);
 }
 
 void hw_set_if(int level) {
-    sound_mixer(audio_card->str, "Capture", level);    
+    // sound_mixer(audio_card->str, "Capture", level);    
 }
 
 static void init_gpio_pins(void) {
@@ -200,7 +201,7 @@ void hw_init(void) {
     si5351bx_init();
     setup_oscillators();
     setup_audio_codec();
-    sound_thread_start("plughw:0,0");
+    // sound_thread_start("plughw:0,0");
 }
 
 void hw_close(void) {

@@ -16,7 +16,8 @@
 			"math.h": "c",
 			"sdr.h": "c",
 			"settings.h": "c",
-			"debug.h": "c"
+			"debug.h": "c",
+			"sound.h": "c"
 		},
 		"cmake.generator": "Ninja"
 	}
