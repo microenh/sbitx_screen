@@ -9,9 +9,13 @@
 
 #include <stdio.h>
 #include <time.h>
-// #include <wiringPi.h>
+#ifndef NO_HARDWARE
+#include <wiringPi.h>
+#endif
 
+#ifdef NO_HARDWARE
 #include "wiringPi.h"
+#endif
 
 static uint8_t PIN_SDA;
 static uint8_t PIN_SCL;

@@ -13,6 +13,7 @@ link_directories(${GTK3_LIBRARY_DIRS})
 
 # Add other flags to the compiler
 add_definitions(${GTK3_CFLAGS_OTHER})
+add_definitions("-D NO_HARDWARE")
 
 FILE(GLOB sources *.c tmate2/*.c)
 add_executable(sbitx_screen ${sources})

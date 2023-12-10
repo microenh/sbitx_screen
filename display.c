@@ -49,8 +49,6 @@ G_MODULE_EXPORT void btn_step_clicked_cb(GtkButton *b);
 
 G_MODULE_EXPORT void ent_command_activate_cb(GtkEntry *e);
 
-
-
 typedef enum _offOn {
     o_off,
     o_on,
@@ -199,7 +197,9 @@ void display_init(int argc, char **argv) {
     gtk_builder_connect_signals(builder, NULL);
 
 	gtk_widget_show(window);
-	// gtk_window_fullscreen(GTK_WINDOW(window));
+    #ifndef NO_HARDWARE
+	gtk_window_fullscreen(GTK_WINDOW(window));
+    #endif
 }
 
 void display_close(void) {

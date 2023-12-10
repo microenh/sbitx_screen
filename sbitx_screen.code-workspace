@@ -20,7 +20,7 @@
 			"sdr.h": "c",
 			"settings.h": "c",
 			"debug.h": "c",
-			"sound.h": "c"
+			"si5351.h": "c"
 		},
 		"cmake.generator": "Ninja"
 	}
