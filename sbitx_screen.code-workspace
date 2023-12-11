@@ -2,9 +2,6 @@
 	"folders": [
 		{
 			"path": "."
-		},
-		{
-			"path": "../Tmate2_C/tmate2"
 		}
 	],
 	"settings": {

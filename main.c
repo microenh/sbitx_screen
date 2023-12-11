@@ -41,10 +41,12 @@
 #include "global_string.h"
 #include "settings.h"
 #include "radio_state.h"
+#include "tmate2.h"
 
 
 int main(int argc, char *argv[]) {
-	global_string_init();
+	tmate2_init();
+	global_string_init();	
 	debug_init();
 	display_init(argc, argv);
 	radio_init();
@@ -55,6 +57,7 @@ int main(int argc, char *argv[]) {
 	display_close();
 	debug_close();
 	global_string_close();
+	tmate2_close();
 
 	return EXIT_SUCCESS;
 }

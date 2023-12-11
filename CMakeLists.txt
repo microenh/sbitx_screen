@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(sbitx_screen VERSION 0.1.0)
 
+set(CMAKE_C_FLAGS "-mno-ms-bitfields")
 
 # Add GTK3+
 find_package(PkgConfig REQUIRED)

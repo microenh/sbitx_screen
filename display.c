@@ -1,17 +1,18 @@
+#include <ctype.h>
+#include <gtk/gtk.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <ctype.h>
 #include <time.h>
-#include <gtk/gtk.h>
 
+#include "console.h"
 #include "debug.h"
 #include "display.h"
 #include "global_string.h"
 #include "radio_state.h"
-#include "settings.h"
 #include "rotary.h"
+#include "settings.h"
+#include "tmate2/tmate2.h"
 #include "update_css.h"
-#include "console.h"
 
 static const gchar * const GLADE = "sbitx_screen.glade";
 static const gchar * const CSS = "main.css";
@@ -125,6 +126,8 @@ int heartbeat(gpointer data) {
             }
         }
     }
+    tmate2_tick();
+
     if (level_ticks) {
         do_sub_encoder_inc(level_ticks);
         level_ticks = 0;
@@ -333,6 +336,7 @@ void update_vfo_frequency(Vfo vfo, int frequency) {
         -1, -1
     };
     if (frequency != saved[vfo]) {
+        display_main_number(frequency);
         char temp[20];
         saved[vfo] = frequency;
         sprintf(temp, "%2d.%03d.%02d", frequency / 1000000, (frequency / 1000) % 1000, (frequency % 1000) / 10);
